@@ -1,6 +1,6 @@
 <?php
 
-namespace Codekinz\LivewireEasyTags\Traits;
+namespace Codekinz\LivewireTagify\Traits;
 use Spatie\Tags\HasTags;
 
 trait HasSpatieTags

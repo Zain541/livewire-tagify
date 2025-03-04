@@ -1,6 +1,6 @@
 <?php
 
-namespace Codekinz\LivewireEasyTags\Components;
+namespace Codekinz\LivewireTagify\Components;
 
 use Livewire\Component;
 
