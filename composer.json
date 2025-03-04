@@ -25,7 +25,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                    "Codekinz\\LivewireTagify\\LivewireEasyTagsServiceProvider"
+                    "Codekinz\\LivewireTagify\\LivewireTagifyServiceProvider"
                 ]
             }
         }

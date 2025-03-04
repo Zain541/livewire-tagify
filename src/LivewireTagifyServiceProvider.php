@@ -8,7 +8,7 @@ use Codekinz\LivewireTagify\Components\LivewireEasyTags;
 // namespace WireElements\Pro\Components\Modal\Foundation;
 
 
-class LivewireEasyTagsServiceProvider extends ServiceProvider{
+class LivewireTagifyServiceProvider extends ServiceProvider{
 
 
   public function boot()
@@ -21,7 +21,7 @@ class LivewireEasyTagsServiceProvider extends ServiceProvider{
         __DIR__.'/Config/livewire-tagify.php' => config_path('livewire-tagify.php'),
         __DIR__.'/Database/Migrations/create_tags_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_tags_table.php'),
     ], 'livewire-tagify');
-    //php artisan vendor:publish --provider="LivewireEasyTags\LivewireEasyTagsServiceProvider"  --tag=livewire-tagify-config
+    //php artisan vendor:publish --provider="LivewireEasyTags\LivewireTagifyServiceProvider"  --tag=livewire-tagify-config
   }
 
   public function register()

@@ -31,7 +31,7 @@ composer require codekinz/livewire-tagify
 
 'providers' => [
     // Other service providers
-    Codekinz\LivewireTagify\LivewireEasyTagsServiceProvider::class,
+    Codekinz\LivewireTagify\LivewireTagifyServiceProvider::class,
 ],
 ```
 Publish the migration and config files
