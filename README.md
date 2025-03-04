@@ -48,7 +48,7 @@ In order to use Livewire tagify, you will first need to create a Livewire compon
 ```bash
 php artisan make:livewire Tags
 ```
-In Livewire Tags component, instead of extending the Livewire class you will need to extend the `LivewireEasyTags`. You Tags component should look like this
+In Livewire Tags component, instead of extending the Livewire class you will need to extend the `LivewireTagify`. You Tags component should look like this
 
 ```php
 <?php
@@ -56,11 +56,11 @@ In Livewire Tags component, instead of extending the Livewire class you will nee
 namespace App\Http\Livewire;
 
 use Livewire\Component;
-use Codekinz\LivewireTagify\Components\LivewireEasyTags;
-use Codekinz\LivewireTagify\Contracts\HasEasyTags;
+use Codekinz\LivewireTagify\Components\LivewireTagify;
+use Codekinz\LivewireTagify\Contracts\HasTags;
 use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireEasyTags implements HasEasyTags
+class Tags extends LivewireTagify implements HasTags
 {
     use InteractsWithTags;
 }
@@ -108,11 +108,11 @@ Configurations are available at `config/livewire-tagify.php`. You can change the
 namespace App\Http\Livewire;
 
 use Livewire\Component;
-use Codekinz\LivewireTagify\Components\LivewireEasyTags;
-use Codekinz\LivewireTagify\Contracts\HasEasyTags;
+use Codekinz\LivewireTagify\Components\LivewireTagify;
+use Codekinz\LivewireTagify\Contracts\HasTags;
 use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireEasyTags implements HasEasyTags
+class Tags extends LivewireTagify implements HasTags
 {
     use InteractsWithTags;
 

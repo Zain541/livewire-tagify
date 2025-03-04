@@ -4,7 +4,7 @@ namespace Codekinz\LivewireTagify\Contracts;
 
 use Illuminate\Support\Collection;
 
-interface HasEasyTags
+interface HasTags
 {
 
     public function prepareConfigurations() : array;
