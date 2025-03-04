@@ -76,11 +76,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Codekinz\LivewireTagify\Traits\HasSpatieTags;
+use Codekinz\LivewireTagify\Traits\HasTags;
 
 class YourModel extends Model
 {
-    use HasFactory, HasSpatieTags;
+    use HasFactory, HasTags;
     ...
 }
 ```
