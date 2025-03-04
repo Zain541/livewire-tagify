@@ -57,10 +57,10 @@ namespace App\Http\Livewire;
 
 use Livewire\Component;
 use Codekinz\LivewireTagify\Components\LivewireTagify;
-use Codekinz\LivewireTagify\Contracts\HasTags;
+use Codekinz\LivewireTagify\Contracts\TagsContract;
 use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireTagify implements HasTags
+class Tags extends LivewireTagify implements TagsContract
 {
     use InteractsWithTags;
 }
@@ -109,10 +109,10 @@ namespace App\Http\Livewire;
 
 use Livewire\Component;
 use Codekinz\LivewireTagify\Components\LivewireTagify;
-use Codekinz\LivewireTagify\Contracts\HasTags;
+use Codekinz\LivewireTagify\Contracts\TagsContract;
 use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireTagify implements HasTags
+class Tags extends LivewireTagify implements TagsContract
 {
     use InteractsWithTags;
 
