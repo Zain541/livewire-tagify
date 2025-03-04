@@ -9,7 +9,7 @@ Livewire Easy Tags is a powerful and convenient package that enhances the Livewi
 To install Livewire Easy Tags, use Composer:
 
 ```bash
-composer require codekinz/livewire-easy-tags
+composer require codekinz/livewire-tagify
 ```
 
 ## Prerequisite
@@ -31,12 +31,12 @@ composer require codekinz/livewire-easy-tags
 
 'providers' => [
     // Other service providers
-    Codekinz\LivewireEasyTags\LivewireEasyTagsServiceProvider::class,
+    Codekinz\LivewireTagify\LivewireTagifyServiceProvider::class,
 ],
 ```
 Publish the migration and config files
 ```bash
-php artisan vendor:publish --tag=livewire-easy-tags
+php artisan vendor:publish --tag=livewire-tagify
 ```
 Run the migration
 ```bash
@@ -44,22 +44,23 @@ php artisan migrate
 ```
 
 ### Set up the Livewire component
-In order to use Livewire easy tags, you will first need to create a Livewire component
+In order to use Livewire tagify, you will first need to create a Livewire component
 ```bash
 php artisan make:livewire Tags
 ```
-In Livewire Tags component, instead of extending the Livewire class you will need to extend the `LivewireEasyTags`. You Tags component should look like this
+In Livewire Tags component, instead of extending the Livewire class you will need to extend the `LivewireTagify`. You Tags component should look like this
+
 ```php
 <?php
 
 namespace App\Http\Livewire;
 
 use Livewire\Component;
-use Codekinz\LivewireEasyTags\Components\LivewireEasyTags;
-use Codekinz\LivewireEasyTags\Contracts\HasEasyTags;
-use Codekinz\LivewireEasyTags\Traits\InteractsWithTags;
+use Codekinz\LivewireTagify\Components\LivewireTagify;
+use Codekinz\LivewireTagify\Contracts\TagsContract;
+use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireEasyTags implements HasEasyTags
+class Tags extends LivewireTagify implements TagsContract
 {
     use InteractsWithTags;
 }
@@ -67,6 +68,7 @@ class Tags extends LivewireEasyTags implements HasEasyTags
 ```
 ### Add trait to Laravel Model
 This package uses <a href="https://spatie.be/docs/laravel-tags/v4/introduction" target="_blank">Laravel Spatie Tags</a> as an underlying package. So, in order to use its functionality, you need to use this Trait `HasSpatieTags` in your model class.
+
 ```php
 <?php
 
@@ -74,11 +76,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Codekinz\LivewireEasyTags\Traits\HasSpatieTags;
+use Codekinz\LivewireTagify\Traits\HasTags;
 
 class YourModel extends Model
 {
-    use HasFactory, HasSpatieTags;
+    use HasFactory, HasTags;
     ...
 }
 ```
@@ -98,18 +100,19 @@ Here is the explanation of parameters
 - `tagType` allows you to set up tags for multiple modules. For instance, you need to use tags for multiple modules like travel, bookings and flights then the `tagType` parameter will serve the purpose.
 
 ## Configurations
-Configurations are available at `config/livewire-easy-tags.php`. You can change the configuration in this file globally or you can use this function in your `Tags` component if you want to have multiple tags component
+Configurations are available at `config/livewire-tagify.php`. You can change the configuration in this file globally or you can use this function in your `Tags` component if you want to have multiple tags component
+
 ```php
 <?php
 
 namespace App\Http\Livewire;
 
 use Livewire\Component;
-use Codekinz\LivewireEasyTags\Components\LivewireEasyTags;
-use Codekinz\LivewireEasyTags\Contracts\HasEasyTags;
-use Codekinz\LivewireEasyTags\Traits\InteractsWithTags;
+use Codekinz\LivewireTagify\Components\LivewireTagify;
+use Codekinz\LivewireTagify\Contracts\TagsContract;
+use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireEasyTags implements HasEasyTags
+class Tags extends LivewireTagify implements TagsContract
 {
     use InteractsWithTags;
 

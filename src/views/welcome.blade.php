@@ -9,7 +9,7 @@
   @livewireStyles
 </head>
 <body>
-  @livewire('livewire-easy-tags')
+  @livewire('livewire-tagify')
   @livewireScripts
   
 </body>

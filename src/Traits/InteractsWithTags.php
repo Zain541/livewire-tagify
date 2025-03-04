@@ -1,5 +1,5 @@
 <?php
-namespace Codekinz\LivewireEasyTags\Traits;
+namespace Codekinz\LivewireTagify\Traits;
 
 use Spatie\Tags\Tag;
 use Illuminate\Support\Collection;
@@ -56,7 +56,7 @@ trait InteractsWithTags{
             }
             else
             {
-                $prepareFinalConfigurations[$configurationKey] = config('livewire-easy-tags')[$configurationKey];
+                $prepareFinalConfigurations[$configurationKey] = config('livewire-tagify')[$configurationKey];
             }
         }
         return $prepareFinalConfigurations;
@@ -166,6 +166,6 @@ trait InteractsWithTags{
 
     public function render()
     {
-        return view('livewire-easy-tags::livewire.livewire-easy-tags');
+        return view('livewire-tagify::livewire.livewire-tagify');
     }
 }
