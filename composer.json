@@ -1,5 +1,5 @@
 {
-    "name": "codekinz/livewire-easy-tags",
+    "name": "codekinz/livewire-tagify",
     "description": "A Laravel tag system for artisans which is built in Livewire, Laravel Spatie tags, Tagify and Alpine Js.",
     "type": "library",
     "require": {
@@ -9,7 +9,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Codekinz\\LivewireEasyTags\\": "src/"
+            "Codekinz\\LivewireTagify\\": "src/"
         }
     },
     "license": "MIT",
@@ -25,7 +25,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                    "Codekinz\\LivewireEasyTags\\LivewireEasyTagsServiceProvider"
+                    "Codekinz\\LivewireTagify\\LivewireTagifyServiceProvider"
                 ]
             }
         }

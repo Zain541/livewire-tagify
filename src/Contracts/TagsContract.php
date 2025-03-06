@@ -1,10 +1,10 @@
 <?php
 
-namespace Codekinz\LivewireEasyTags\Contracts;
+namespace Codekinz\LivewireTagify\Contracts;
 
 use Illuminate\Support\Collection;
 
-interface HasEasyTags
+interface TagsContract
 {
 
     public function prepareConfigurations() : array;
