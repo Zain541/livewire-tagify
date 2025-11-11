@@ -1,11 +1,12 @@
 <?php
+
 namespace Codekinz\LivewireTagify\Traits;
 
 use Spatie\Tags\Tag;
 use Illuminate\Support\Collection;
 
-
-trait InteractsWithTags{
+trait InteractsWithTags
+{
     public $componentKey;
     public $modelClass;
     public $modelId;
@@ -15,7 +16,7 @@ trait InteractsWithTags{
 
     public function mount()
     {
-        $modelObject = new $this->modelClass;
+        $modelObject = new $this->modelClass();
         $this->modelCollection = $modelObject->find($this->modelId);
         $this->componentKey = rand(1, 1000000) . microtime(true);
     }
@@ -31,31 +32,23 @@ trait InteractsWithTags{
         ];
     }
 
-    public function prepareConfigurations() : array
+    public function prepareConfigurations(): array
     {
 
         $configurationKeys = ['colors', 'default_color'];
         $configurations = $this->configurations();
         $prepareFinalConfigurations = [];
-        foreach($configurationKeys as $configurationKey)
-        {
-            if(isset($configurations[$configurationKey]) && $configurations[$configurationKey] != '' && $configurations[$configurationKey] != null)
-            {
-                if($configurationKey == 'colors')
-                {
-                    if(is_array($configurations[$configurationKey]) && count($configurations[$configurationKey]) > 0)
-                    {
+        foreach ($configurationKeys as $configurationKey) {
+            if (isset($configurations[$configurationKey]) && $configurations[$configurationKey] != '' && $configurations[$configurationKey] != null) {
+                if ($configurationKey == 'colors') {
+                    if (is_array($configurations[$configurationKey]) && count($configurations[$configurationKey]) > 0) {
 
                         $prepareFinalConfigurations[$configurationKey] = $configurations[$configurationKey];
                     }
-                }
-                else
-                {
+                } else {
                     $prepareFinalConfigurations[$configurationKey] = $configurations[$configurationKey];
                 }
-            }
-            else
-            {
+            } else {
                 $prepareFinalConfigurations[$configurationKey] = config('livewire-tagify')[$configurationKey];
             }
         }
@@ -63,17 +56,17 @@ trait InteractsWithTags{
     }
 
 
-    public function addNewTag($tagArray) : void
+    public function addNewTag($tagArray): void
     {
         $this->modelCollection->syncTagsWithType(array_column($tagArray, 'value'), $this->tagType);
     }
 
-    public function changeColorTag($tag, $tagType, $color) : void
+    public function changeColorTag($tag, $tagType, $color): void
     {
         Tag::where(['type' => $tagType, 'name->en' => $tag])->update(['color' => $color]);
     }
 
-    public function deleteTag($tagId) : void
+    public function deleteTag($tagId): void
     {
         Tag::whereId($tagId)->delete();
     }
@@ -102,7 +95,7 @@ trait InteractsWithTags{
         return $mappedTags;
     }
 
-    public function removeTag($tagsArray) : void
+    public function removeTag($tagsArray): void
     {
         $this->modelCollection->detachTag($tagsArray['value'], $this->tagType);
     }
@@ -123,7 +116,7 @@ trait InteractsWithTags{
         $record->name = $objectToBeArray['value'];
         $record->save();
     }
-    public function prepareWhitelist() : string
+    public function prepareWhitelist(): string
     {
 
         // Retrieve the tags with the specified type
@@ -147,7 +140,7 @@ trait InteractsWithTags{
         return $result;
     }
 
-    public function prepareTransformTag() : string
+    public function prepareTransformTag(): string
     {
         $tags = Tag::get();
         $whitelist = '';
@@ -161,7 +154,7 @@ trait InteractsWithTags{
 
     protected function configurations(): array
     {
-       return [];
+        return [];
     }
 
     public function render()
