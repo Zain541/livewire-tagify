@@ -2,7 +2,7 @@
     @php
         $configuration = $this->prepareConfigurations();
     @endphp
-    <div style="position:relative" wire:key='{{ $componentKey }}' x-data="{
+    <div class="tagify-wrapper" style="position:relative" wire:key='{{ $componentKey }}' x-data="{
         tagify: null,
         openDropdown: false,
         defaultColor: '{{ $configuration['default_color'] }}',
@@ -104,7 +104,7 @@
 
         <input type="text" x-ref="tagInput" value='{{ $this->getModelTags() }}'>
         <div x-ref="panel" class="tagify__dropdown tagify__dropdown--text absolute left-0 mt-2 px-2 rounded-md" x-show="openDropdown" x-transition.origin.top.left x-on:click.outside="close()"
-            style="display: none; !important;" class="">
+            style="display: none; !important;">
             <!-- Added flex and flex-col classes -->
             <div class="tagify__dropdown__item flex cursor-pointer px-4 py-2.5 my-1 text-left text-sm hover:bg-gray-200 disabled:text-gray-500 items-center">
                 <a x-on:click="deleteTag()"
