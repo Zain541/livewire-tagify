@@ -82,7 +82,11 @@
 
                 let onAddTag = (e) => {
                     Livewire.emit('addNewTagEvent', e.detail.tagify.value);
-                    this.tagify.whitelist.push({ 'value': e.detail.data.value, 'color': this.defaultColor });
+                    
+                    const value = e.detail.data.value;
+                    if (!this.tagify.whitelist.some(item => item.value === value)) {
+                        this.tagify.whitelist.push({ value, color: this.defaultColor });
+                    }
                 }
 
                 let onRemoveTag = (e) => {
