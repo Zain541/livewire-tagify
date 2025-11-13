@@ -131,13 +131,47 @@
             height: 35px;
             border-radius: 50%;
         }
+        
         .tagify__dropdown{
             background-color: #ffffff;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
         }
+
+        .tagify {
+            /* Spacing & sizing */
+            --tag-pad: 0.3em 0.5em;
+            --tag-border-radius: 3px;
+            --tag-min-width: 2ch;
+            --tag-max-width: 20ch;
+            --loader-size: 1em;
+            --tagify-dd-item-hidden-duration: 300ms;
+            --tagify-dd-item-pad: 0.3em;
+
+            /* Colors */
+            --tag-bg: #f3f3f3;
+            --tag-hover: #e0e0e0;
+            --tags-border-color: #d9d9d9;
+            --tags-hover-border-color: #b0b0b0;
+            --tags-focus-border-color: #1e8eff;
+            --tagify-dd-text-color: #333;
+            --tagify-dd-bg-color: #fff;
+            --tag-text-color: #333;
+            --tag-text-color-edit: #000;
+            --tag-remove-bg: #ffdddd;
+            --tag-remove-btn-bg: transparent;
+            --tag-remove-btn-bg-hover: #ffaaaa;
+            --tag-invalid-color: #d9534f;
+            --tag-invalid-bg: #f2dede;
+            --placeholder-color: #999;
+            --placeholder-color-focus: #666;
+            --input-color: #000;
+
+            /* Font & misc */
+            --tag-font-size: 0.85em;
+            --tag-line-height: 1.4;
+        }
+
+
     </style>
-
-
 </div>
-
