@@ -16,8 +16,7 @@ trait InteractsWithTags
 
     public function mount()
     {
-        $modelObject = new $this->modelClass();
-        $this->modelCollection = $modelObject->find($this->modelId);
+        $this->modelCollection = (new $this->modelClass())->findOrFail($this->modelId);
         $this->componentKey = rand(1, 1000000) . microtime(true);
     }
 
