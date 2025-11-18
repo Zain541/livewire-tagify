@@ -170,6 +170,42 @@
             /* Font & misc */
             --tag-font-size: 0.85em;
             --tag-line-height: 1.4;
+
+            --input-bg: #ffffff;
+            --input-bg-dark: rgba(255,255,255,0.05);
+
+            --input-text: #111827;
+            --input-text-dark: #ffffff;
+
+            --input-placeholder: #9ca3af;
+            --input-placeholder-dark: #6b7280;
+
+            --input-outline: #d1d5db;
+            --input-outline-dark: rgba(255,255,255,0.1);
+
+            --input-outline-focus: #4f46e5;
+            --input-outline-focus-dark: #6366f1;
+
+            --input-border-radius: 0.375rem;
+
+            --input-font-size-base: 1rem;
+            --input-line-height-base: 1.5rem;
+
+            --input-font-size-sm: 0.875rem;
+            --input-line-height-sm: 1.5rem;
+
+            display: inline-flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            border: 2px solid var(--tags-border-color);
+            padding: 0;
+            line-height: 0;
+            cursor: text;
+            outline: 0;
+            position: relative;
+            box-sizing: border-box;
+            transition: .1s;
+            border-radius: 10px;
         }
 
 
