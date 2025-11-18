@@ -139,75 +139,19 @@
         }
 
         .tagify {
-            /* Spacing & sizing */
-            --tag-pad: 0.3em 0.5em;
+            --tag-remove-bg: #fee2e2;
+            --tag-remove-btn-bg--hover: #f87171;
+            
+            --tags-hover-border-color: #b0b0b0; /* input color */ 
+            --tags-focus-border-color: #000; /* input color */
+
             --tag-border-radius: 3px;
-            --tag-min-width: 2ch;
-            --tag-max-width: 20ch;
-            --loader-size: 1em;
-            --tagify-dd-item-hidden-duration: 300ms;
-            --tagify-dd-item-pad: 0.3em;
+            --tag-hover: #dbeafe;
+            --tag-text-color: #000;
 
-            /* Colors */
-            --tag-bg: #f3f3f3;
-            --tag-hover: #e0e0e0;
-            --tags-border-color: #d9d9d9;
-            --tags-hover-border-color: #b0b0b0;
-            --tags-focus-border-color: #1e8eff;
-            --tagify-dd-text-color: #333;
-            --tagify-dd-bg-color: #fff;
-            --tag-text-color: #333;
-            --tag-text-color-edit: #000;
-            --tag-remove-bg: #ffdddd;
-            --tag-remove-btn-bg: transparent;
-            --tag-remove-btn-bg-hover: #ffaaaa;
-            --tag-invalid-color: #d9534f;
-            --tag-invalid-bg: #f2dede;
-            --placeholder-color: #999;
-            --placeholder-color-focus: #666;
-            --input-color: #000;
-
-            /* Font & misc */
-            --tag-font-size: 0.85em;
-            --tag-line-height: 1.4;
-
-            --input-bg: #ffffff;
-            --input-bg-dark: rgba(255,255,255,0.05);
-
-            --input-text: #111827;
-            --input-text-dark: #ffffff;
-
-            --input-placeholder: #9ca3af;
-            --input-placeholder-dark: #6b7280;
-
-            --input-outline: #d1d5db;
-            --input-outline-dark: rgba(255,255,255,0.1);
-
-            --input-outline-focus: #4f46e5;
-            --input-outline-focus-dark: #6366f1;
-
-            --input-border-radius: 0.375rem;
-
-            --input-font-size-base: 1rem;
-            --input-line-height-base: 1.5rem;
-
-            --input-font-size-sm: 0.875rem;
-            --input-line-height-sm: 1.5rem;
-
-            display: inline-flex;
-            align-items: flex-start;
-            flex-wrap: wrap;
-            border: 2px solid var(--tags-border-color);
-            padding: 0;
-            line-height: 0;
-            cursor: text;
-            outline: 0;
-            position: relative;
-            box-sizing: border-box;
-            transition: .1s;
-            border-radius: 10px;
+            border: 1px solid var(--tags-border-color);
+            border-radius: 0.375rem; 
+            width: 100%; 
         }
-
-
     </style>
 </div>
