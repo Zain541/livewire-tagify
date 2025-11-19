@@ -34,7 +34,9 @@
         "laravel/pint": "^1.25",
         "pestphp/pest": "^2.36",
         "pestphp/pest-plugin-laravel": "^2.4",
-        "orchestra/testbench": "^8.34"
+        "orchestra/testbench": "^8.34",
+        "laravel/dusk": "^8.3",
+        "orchestra/testbench-dusk": "^8.36"
     },
     "config": {
         "allow-plugins": {
