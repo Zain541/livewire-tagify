@@ -15,10 +15,10 @@ class DuskTestCase extends TestCase
     protected function setUp(): void
     {
         $dbFile = __DIR__ . '/../../database.sqlite';
-        if (file_exists($dbFile)) {
-            unlink($dbFile);
+
+        if (!file_exists($dbFile)) {
+            touch($dbFile);
         }
-        touch($dbFile);
 
         parent::setUp();
     }
@@ -58,6 +58,8 @@ class DuskTestCase extends TestCase
     protected function defineDatabaseMigrations()
     {
         $this->loadMigrationsFrom(__DIR__ . '/../../src/Database/Migrations');
+
+        Schema::dropIfExists('test_models');
 
         Schema::create('test_models', function ($table) {
             $table->id();
