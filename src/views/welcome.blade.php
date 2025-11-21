@@ -11,6 +11,5 @@
 <body>
   @livewire('livewire-tagify')
   @livewireScripts
-  
 </body>
 </html>

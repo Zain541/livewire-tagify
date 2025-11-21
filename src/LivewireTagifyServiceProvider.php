@@ -26,6 +26,7 @@ class LivewireTagifyServiceProvider extends ServiceProvider
 
     public function register()
     {
+        $this->mergeConfigFrom(__DIR__ . '/Config/livewire-tagify.php', 'livewire-tagify');
     }
 
 }
