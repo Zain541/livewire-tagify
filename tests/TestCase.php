@@ -48,5 +48,10 @@ class TestCase extends Orchestra
             $table->id();
             $table->string('name');
         });
+
+        Schema::create('test_untaggable_models', function ($table) {
+            $table->id();
+            $table->string('name');
+        });
     }
 }

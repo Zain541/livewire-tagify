@@ -10,7 +10,6 @@ class LivewireTagifyServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        $this->loadRoutesFrom(__DIR__.'/routes/web.php');
         $this->loadViewsFrom(__DIR__.'/views', 'livewire-tagify');
         Livewire::component('livewire-tagify', LivewireTagify::class);
 

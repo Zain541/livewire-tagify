@@ -36,14 +36,19 @@ Laravel should auto-discover the service provider. If package discovery is disab
     Codekinz\LivewireTagify\LivewireTagifyServiceProvider::class,
 ],
 ```
-Publish the migration and config files
+Publish the config and migration files:
 ```bash
 php artisan vendor:publish --tag=livewire-tagify
 ```
-Run the migration
+
+The published migration safely prepares the tag tables. If `tags` or `taggables` already exist, it leaves them alone. If the `tags.color` column already exists, it leaves that alone too.
+
+Run the migration:
 ```bash
 php artisan migrate
 ```
+
+On rollback, this package only removes the `color` column. It does not drop the `tags` or `taggables` tables because those tables may already belong to Spatie Laravel Tags or your app.
 
 ### Add trait to Laravel Model
 This package uses <a href="https://spatie.be/docs/laravel-tags/v4/introduction" target="_blank">Laravel Spatie Tags</a> as an underlying package. Add this package's `HasTags` trait to your model.
@@ -74,9 +79,11 @@ Now we are good to go. We just need to call the package Livewire component in a 
         ])
 ```
 Here is the explanation of parameters
-- `modelClass` is the class of the model that you want to associate with the tag
-- `modelId` is the record identifier i.e primary key value
-- `tagType` allows you to set up tags for multiple modules. For instance, you need to use tags for multiple modules like travel, bookings and flights then the `tagType` parameter will serve the purpose.
+- `modelClass` must be an Eloquent model class that uses `Codekinz\LivewireTagify\Traits\HasTags`
+- `modelId` must be an existing model record ID
+- `tagType` must be a non-empty string using only letters, numbers, dashes, underscores, or colons
+
+`tagType` lets you separate tags for different areas, such as `travel`, `bookings`, or `flights`.
 
 ## Configurations
 Configurations are available at `config/livewire-tagify.php`. You can change the configuration in this file globally or extend the package component when one screen needs custom settings.
@@ -190,6 +197,12 @@ A. Just like previously, you need to click on the tag you will see a dropdown co
 
 Q. How to edit a tag?  
 A. Double click on a tag and edit it.
+
+## Upgrade Notes
+
+If you previously created a Livewire component only to extend `LivewireTagify` and implement `TagsContract`, you can now remove that wrapper and call `@livewire('livewire-tagify', [...])` directly. Keep a custom component only when you need to override `configurations()` or add your own Livewire behavior.
+
+The package migration now safely prepares the tag tables and adds `tags.color` only when needed. Rolling back this package removes only `tags.color`; it does not drop `tags` or `taggables`.
 
 ## Main Contributor
 - [Zain Farooq](https://www.linkedin.com/in/zain-farooq-b3a914147)
