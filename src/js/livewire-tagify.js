@@ -149,15 +149,15 @@
             refreshAllTags: function () {
                 if (!this.tagify) return;
                 var self = this;
-                this.suppressEvents = true;
-                this.tagify.getTagElms().forEach(function (tagElm) {
-                    var data = this.tagify.tagData(tagElm);
-                    if (data) {
-                        data.style = computeTagStyle(data.color || self.defaultColor, self.themeDirection, self.themeDark);
-                        this.tagify.replaceTag(tagElm, data);
-                    }
-                }.bind(this));
-                this.suppressEvents = false;
+                this.withSuppressedEvents(function () {
+                    this.tagify.getTagElms().forEach(function (tagElm) {
+                        var data = this.tagify.tagData(tagElm);
+                        if (data) {
+                            data.style = computeTagStyle(data.color || self.defaultColor, self.themeDirection, self.themeDark);
+                            this.tagify.replaceTag(tagElm, data);
+                        }
+                    }.bind(this));
+                });
             },
 
             hasTagify: function () {
@@ -185,6 +185,16 @@
 
                 if (window.console && typeof window.console.warn === 'function') {
                     window.console.warn(message);
+                }
+            },
+
+            withSuppressedEvents: function (callback) {
+                this.suppressEvents = true;
+
+                try {
+                    callback.call(this);
+                } finally {
+                    this.suppressEvents = false;
                 }
             },
 
@@ -330,9 +340,9 @@
                 });
 
                 this.callWire('changeColorTag', [tagData.value, color], function () {
-                    this.suppressEvents = true;
-                    this.tagify.replaceTag(this.activeTag.tag, updatedTag);
-                    this.suppressEvents = false;
+                    this.withSuppressedEvents(function () {
+                        this.tagify.replaceTag(this.activeTag.tag, updatedTag);
+                    });
 
                     this.upsertWhitelistTag(updatedTag);
                     this.close();
@@ -349,9 +359,9 @@
                 }
 
                 this.callWire('deleteTag', [tagData.id], function () {
-                    this.suppressEvents = true;
-                    this.tagify.removeTags(tagData.value);
-                    this.suppressEvents = false;
+                    this.withSuppressedEvents(function () {
+                        this.tagify.removeTags(tagData.value, true);
+                    });
 
                     this.removeWhitelistTag(tagData);
                     this.close();
@@ -372,16 +382,16 @@
                 this.callWire('editTag', [data], function () {
                     this.upsertWhitelistTag(updatedTag);
                 }, function () {
-                    this.suppressEvents = true;
+                    this.withSuppressedEvents(function () {
+                        if (event.detail.tag) {
+                            this.tagify.replaceTag(event.detail.tag, oldTag);
 
-                    if (event.detail.tag) {
-                        this.tagify.replaceTag(event.detail.tag, oldTag);
-                    } else {
-                        this.tagify.removeTags(updatedTag.value);
+                            return;
+                        }
+
+                        this.tagify.removeTags(updatedTag.value, true);
                         this.tagify.addTags([oldTag]);
-                    }
-
-                    this.suppressEvents = false;
+                    });
                     this.upsertWhitelistTag(oldTag);
                 });
             },
@@ -408,13 +418,11 @@
                         this.upsertWhitelistTag(tag);
                     }.bind(this));
                 }, function () {
-                    this.suppressEvents = true;
-
-                    tags.forEach(function (tag) {
-                        this.tagify.removeTags(tag.value);
-                    }.bind(this));
-
-                    this.suppressEvents = false;
+                    this.withSuppressedEvents(function () {
+                        tags.forEach(function (tag) {
+                            this.tagify.removeTags(tag.value, true);
+                        }.bind(this));
+                    });
                 });
             },
 
@@ -426,9 +434,9 @@
                 var removedTag = normalizeTag(event.detail.data, this.defaultColor, this.themeDirection, this.themeDark);
 
                 this.callWire('removeTag', [event.detail.data], null, function () {
-                    this.suppressEvents = true;
-                    this.tagify.addTags([removedTag]);
-                    this.suppressEvents = false;
+                    this.withSuppressedEvents(function () {
+                        this.tagify.addTags([removedTag]);
+                    });
                     this.upsertWhitelistTag(removedTag);
                 });
             },

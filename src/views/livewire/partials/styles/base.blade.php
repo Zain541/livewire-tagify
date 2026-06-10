@@ -39,6 +39,8 @@
         align-items: center;
         flex-wrap: wrap;
         width: 100%;
+        min-height: 40px;
+        box-sizing: border-box;
         border-radius: 12px;
         padding: var(--tagify-input-padding, 6px 8px);
         line-height: normal;
@@ -137,7 +139,8 @@
     .tagify__input {
         margin: 0 !important;
         padding: 0 4px !important;
-        line-height: normal !important;
+        min-height: 24px;
+        line-height: 24px !important;
         font-size: 14px;
         font-family: inherit;
         color: #1a1d24;
