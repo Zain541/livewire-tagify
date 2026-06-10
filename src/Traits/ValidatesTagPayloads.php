@@ -4,7 +4,7 @@ namespace Codekinz\LivewireTagify\Traits;
 
 trait ValidatesTagPayloads
 {
-    protected function validatedTagValues($tagArray): array
+    protected function validatedTagValues(array $tagArray): array
     {
         if (! is_array($tagArray)) {
             return [];
@@ -23,11 +23,17 @@ trait ValidatesTagPayloads
         return array_values(array_unique($values));
     }
 
+    /**
+     * @param  int|string  $tagId
+     */
     protected function isValidTagId($tagId): bool
     {
         return is_int($tagId) || (is_string($tagId) && ctype_digit($tagId));
     }
 
+    /**
+     * @param  mixed  $value
+     */
     protected function isValidTagValue($value): bool
     {
         if (! is_string($value)) {
@@ -39,7 +45,7 @@ trait ValidatesTagPayloads
         return $value !== '' && strlen($value) <= (int) config('livewire-tagify.max_tag_length', 255);
     }
 
-    protected function isAllowedColor($color): bool
+    protected function isAllowedColor(string $color): bool
     {
         if (! is_string($color)) {
             return false;

@@ -61,6 +61,10 @@ trait ResolvesTagifyConfiguration
         return [];
     }
 
+    /**
+     * @param  mixed  $default
+     * @return mixed
+     */
     protected function preparedConfiguration(string $key, $default = null)
     {
         return $this->prepareConfigurations()[$key] ?? $default;

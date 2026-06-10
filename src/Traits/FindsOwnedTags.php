@@ -6,6 +6,9 @@ use Spatie\Tags\Tag;
 
 trait FindsOwnedTags
 {
+    /**
+     * @param  int|string  $tagId
+     */
     protected function findOwnedTagById($tagId): ?Tag
     {
         if (! $this->isValidTagId($tagId)) {
@@ -19,7 +22,7 @@ trait FindsOwnedTags
             ->first();
     }
 
-    protected function findOwnedTagByValue($tagValue): ?Tag
+    protected function findOwnedTagByValue(string $tagValue): ?Tag
     {
         if (! $this->isValidTagValue($tagValue)) {
             return null;

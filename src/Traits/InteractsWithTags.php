@@ -14,10 +14,19 @@ trait InteractsWithTags
     use ResolvesTagifyConfiguration;
     use ValidatesTagPayloads;
 
+    /** @var string */
     public $componentKey;
+
+    /** @var class-string */
     public $modelClass;
+
+    /** @var int|string */
     public $modelId;
+
+    /** @var \Illuminate\Database\Eloquent\Model */
     public $modelCollection;
+
+    /** @var string|null */
     public $tagType;
 
     public function mount(): void
@@ -48,7 +57,7 @@ trait InteractsWithTags
         $this->modelCollection->syncTagsWithType($tagValues, $this->tagType);
     }
 
-    public function changeColorTag($tag, $tagType, $color): void
+    public function changeColorTag(string $tag, string $tagType, string $color): void
     {
         if (! $this->isAllowedColor($color)) {
             return;
@@ -63,6 +72,9 @@ trait InteractsWithTags
         $record->update(['color' => $color]);
     }
 
+    /**
+     * @param  int|string  $tagId
+     */
     public function deleteTag($tagId): void
     {
         $record = $this->findOwnedTagById($tagId);

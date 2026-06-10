@@ -12,9 +12,12 @@ interface TagsContract
     public function addNewTag(array $tagArray): void;
 
 
-    public function changeColorTag($tag, $tagType, $color): void;
+    public function changeColorTag(string $tag, string $tagType, string $color): void;
 
 
+    /**
+     * @param  int|string  $tagId
+     */
     public function deleteTag($tagId): void;
 
 
