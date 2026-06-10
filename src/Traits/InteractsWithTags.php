@@ -86,7 +86,7 @@ trait InteractsWithTags
                     'id' => $tag->id,
                     'value' => $tag->name,
                     'type' => $tag->type,
-                    'color' => $tag->color === null ? 'lightgray' : $tag->color,
+                    'color' => $tag->color === null ? '#2B7CD1' : $tag->color,
                 ];
             });
     }
@@ -137,7 +137,7 @@ trait InteractsWithTags
                 return [
                     'id' => $tag->id,
                     'value' => $tag->name,
-                    'color' => $tag->color === null ? 'lightgray' : $tag->color,
+                    'color' => $tag->color === null ? '#2B7CD1' : $tag->color,
                 ];
             })
             ->values()

@@ -48,9 +48,12 @@ trait ValidatesTagPayloads
 
     protected function isAllowedColor(string $color): bool
     {
+        $allowed = array_values($this->preparedConfiguration('colors', []));
+        $darkColors = array_values($this->preparedConfiguration('dark_colors', []));
+
         return Validator::make(
             ['color' => $color],
-            ['color' => ['required', 'string', Rule::in(array_values($this->preparedConfiguration('colors', [])))]]
+            ['color' => ['required', 'string', Rule::in(array_merge($allowed, $darkColors))]]
         )->passes();
     }
 }

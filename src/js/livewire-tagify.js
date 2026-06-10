@@ -1,15 +1,75 @@
 (function (window, document) {
     'use strict';
 
-    function normalizeTag(tag, defaultColor) {
+    function hexToRgb(color) {
+        var r = parseInt(color.slice(1, 3), 16);
+        var g = parseInt(color.slice(3, 5), 16);
+        var b = parseInt(color.slice(5, 7), 16);
+        return { r: r, g: g, b: b };
+    }
+
+    function getLuminance(r, g, b) {
+        var rs = r / 255, gs = g / 255, bs = b / 255;
+        rs = rs <= 0.03928 ? rs / 12.92 : Math.pow((rs + 0.055) / 1.055, 2.4);
+        gs = gs <= 0.03928 ? gs / 12.92 : Math.pow((gs + 0.055) / 1.055, 2.4);
+        bs = bs <= 0.03928 ? bs / 12.92 : Math.pow((bs + 0.055) / 1.055, 2.4);
+        return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+    }
+
+    function getContrastColor(color) {
+        var rgb = hexToRgb(color);
+        return getLuminance(rgb.r, rgb.g, rgb.b) > 0.5 ? '#1a1a1a' : '#ffffff';
+    }
+
+    function computeTagStyle(color, direction, isDark) {
+        var rgb = hexToRgb(color);
+        var r = rgb.r, g = rgb.g, b = rgb.b;
+
+        if (direction === 'bold') {
+            var textColor = getContrastColor(color);
+            return '--tag-bg:' + color + ';--tag-border-color:' + color + ';--tag-color:' + color + ';--tag-text-color:' + textColor;
+        }
+
+        if (direction === 'glass') {
+            var bgAlpha = isDark ? 0.22 : 0.14;
+            var borderAlpha = isDark ? 0.12 : 0.08;
+            var glassBg = 'rgba(' + r + ',' + g + ',' + b + ',' + bgAlpha + ')';
+            var glassBorder = isDark ? 'rgba(255,255,255,' + borderAlpha + ')' : 'rgba(0,0,0,' + borderAlpha + ')';
+            return '--tag-bg:' + glassBg + ';--tag-border-color:' + glassBorder + ';--tag-color:' + color;
+        }
+
+        var tintAlpha = isDark ? 0.18 : 0.1;
+        var borderBgAlpha = isDark ? 0.25 : 0.18;
+        var tintBg = 'rgba(' + r + ',' + g + ',' + b + ',' + tintAlpha + ')';
+        var tintBorder = 'rgba(' + r + ',' + g + ',' + b + ',' + borderBgAlpha + ')';
+        return '--tag-bg:' + tintBg + ';--tag-border-color:' + tintBorder + ';--tag-color:' + color;
+    }
+
+    function detectTheme(el) {
+        var wrapper = el;
+        while (wrapper && !wrapper.classList.contains('livewire-tagify')) {
+            wrapper = wrapper.parentElement;
+        }
+        if (!wrapper) return { direction: 'refined', isDark: false };
+
+        var direction = 'refined';
+        if (wrapper.classList.contains('livewire-tagify--bold')) direction = 'bold';
+        else if (wrapper.classList.contains('livewire-tagify--glass')) direction = 'glass';
+
+        var isDark = wrapper.classList.contains('livewire-tagify--dark');
+        return { direction: direction, isDark: isDark };
+    }
+
+    function normalizeTag(tag, defaultColor, direction, isDark) {
         var value = tag && typeof tag.value === 'string' ? tag.value : '';
+        var color = tag && tag.color ? tag.color : defaultColor;
 
         return {
             id: tag && Object.prototype.hasOwnProperty.call(tag, 'id') ? tag.id : null,
             value: value,
             type: tag && Object.prototype.hasOwnProperty.call(tag, 'type') ? tag.type : null,
-            color: tag && tag.color ? tag.color : defaultColor,
-            style: '--tag-bg:' + (tag && tag.color ? tag.color : defaultColor),
+            color: color,
+            style: computeTagStyle(color, direction, isDark),
         };
     }
 
@@ -37,14 +97,20 @@
         return {
             tagify: null,
             openDropdown: false,
-            defaultColor: options.defaultColor || 'lightgray',
+            defaultColor: options.defaultColor || '#2B7CD1',
             activeTag: null,
             tagInput: null,
             whitelist: [],
             error: null,
             suppressEvents: false,
+            themeDirection: 'refined',
+            themeDark: false,
 
             init: function () {
+                var theme = detectTheme(this.$el);
+                this.themeDirection = theme.direction;
+                this.themeDark = theme.isDark;
+
                 this.whitelist = this.normalizeWhitelist(options.whitelist || []);
 
                 this.$nextTick(function () {
@@ -57,7 +123,41 @@
                     this.tagify = this.initTagify();
                     this.syncTagifyWhitelist();
                     this.bindTagifyEvents();
+                    this.observeThemeChanges();
                 }.bind(this));
+            },
+
+            observeThemeChanges: function () {
+                var wrapper = this.$el;
+                while (wrapper && !wrapper.classList.contains('livewire-tagify')) {
+                    wrapper = wrapper.parentElement;
+                }
+                if (!wrapper) return;
+
+                var self = this;
+                this._themeObserver = new MutationObserver(function () {
+                    var theme = detectTheme(self.$el);
+                    if (theme.direction !== self.themeDirection || theme.isDark !== self.themeDark) {
+                        self.themeDirection = theme.direction;
+                        self.themeDark = theme.isDark;
+                        self.refreshAllTags();
+                    }
+                });
+                this._themeObserver.observe(wrapper, { attributes: true, attributeFilter: ['class'] });
+            },
+
+            refreshAllTags: function () {
+                if (!this.tagify) return;
+                var self = this;
+                this.suppressEvents = true;
+                this.tagify.getTagElms().forEach(function (tagElm) {
+                    var data = this.tagify.tagData(tagElm);
+                    if (data) {
+                        data.style = computeTagStyle(data.color || self.defaultColor, self.themeDirection, self.themeDark);
+                        this.tagify.replaceTag(tagElm, data);
+                    }
+                }.bind(this));
+                this.suppressEvents = false;
             },
 
             hasTagify: function () {
@@ -131,21 +231,23 @@
             },
 
             normalizeWhitelist: function (tags) {
+                var self = this;
                 return tags.map(function (tag) {
-                    return normalizeTag(tag, this.defaultColor);
-                }.bind(this)).filter(function (tag) {
+                    return normalizeTag(tag, self.defaultColor, self.themeDirection, self.themeDark);
+                }).filter(function (tag) {
                     return tag.value !== '';
                 });
             },
 
             initTagify: function () {
+                var self = this;
                 return new window.Tagify(this.tagInput, {
                     whitelist: [],
                     transformTag: function (tagData) {
-                        var tag = normalizeTag(tagData, this.defaultColor);
+                        var tag = normalizeTag(tagData, self.defaultColor, self.themeDirection, self.themeDark);
                         tagData.color = tag.color;
                         tagData.style = tag.style;
-                    }.bind(this),
+                    },
                     dropdown: {
                         enabled: 0,
                     },
@@ -167,7 +269,7 @@
             },
 
             upsertWhitelistTag: function (tag) {
-                var normalized = normalizeTag(tag, this.defaultColor);
+                var normalized = normalizeTag(tag, this.defaultColor, this.themeDirection, this.themeDark);
                 var index = findTagIndex(this.whitelist, normalized);
 
                 if (index === -1) {
@@ -180,7 +282,7 @@
             },
 
             removeWhitelistTag: function (tag) {
-                var normalized = normalizeTag(tag, this.defaultColor);
+                var normalized = normalizeTag(tag, this.defaultColor, this.themeDirection, this.themeDark);
 
                 this.whitelist = this.whitelist.filter(function (item) {
                     return !sameTag(item, normalized);
@@ -224,7 +326,7 @@
 
                 var updatedTag = Object.assign({}, tagData, {
                     color: color,
-                    style: '--tag-bg:' + color,
+                    style: computeTagStyle(color, this.themeDirection, this.themeDark),
                 });
 
                 this.callWire('changeColorTag', [tagData.value, color], function () {
@@ -264,8 +366,8 @@
                 var data = event.detail.data || {};
                 var previousData = event.detail.previousData || {};
                 var originalData = previousData.__originalData || previousData;
-                var oldTag = normalizeTag(originalData, this.defaultColor);
-                var updatedTag = normalizeTag(data, this.defaultColor);
+                var oldTag = normalizeTag(originalData, this.defaultColor, this.themeDirection, this.themeDark);
+                var updatedTag = normalizeTag(data, this.defaultColor, this.themeDirection, this.themeDark);
 
                 this.callWire('editTag', [data], function () {
                     this.upsertWhitelistTag(updatedTag);
@@ -321,7 +423,7 @@
                     return;
                 }
 
-                var removedTag = normalizeTag(event.detail.data, this.defaultColor);
+                var removedTag = normalizeTag(event.detail.data, this.defaultColor, this.themeDirection, this.themeDark);
 
                 this.callWire('removeTag', [event.detail.data], null, function () {
                     this.suppressEvents = true;

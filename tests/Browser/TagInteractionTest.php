@@ -131,13 +131,13 @@ class TagInteractionTest extends DuskTestCase
                 ->assertSee('Color Me')
                 ->click('.tagify__tag')
                 ->waitFor('.tagify__dropdown', 2)
-                ->click('button[title="#add8e6"]')
+                ->click('button[title="coral"]')
                 ->pause(500);
         });
 
         $tag = Tag::findFromString('Color Me', 'firstType');
 
-        $this->assertSame('#add8e6', $tag->color);
+        $this->assertSame('#E8634A', $tag->color);
     }
 
     /** @test */
