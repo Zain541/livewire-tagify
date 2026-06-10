@@ -4,6 +4,7 @@ namespace Codekinz\LivewireTagify\Traits;
 
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
+use InvalidArgumentException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\Tags\Tag;
@@ -28,7 +29,11 @@ trait InteractsWithTags
 
     public function mount(): void
     {
-        $this->modelCollection = (new $this->modelClass())->findOrFail($this->modelId);
+        $model = $this->validatedModelInstance();
+
+        $this->validateTagType();
+
+        $this->modelCollection = $model->newQuery()->findOrFail($this->modelId);
         $this->componentKey = (string) Str::uuid();
     }
 
@@ -147,5 +152,33 @@ trait InteractsWithTags
     public function render(): View
     {
         return view($this->frontendView());
+    }
+
+    protected function validatedModelInstance(): Model
+    {
+        if (! isset($this->modelClass) || ! is_string($this->modelClass) || ! class_exists($this->modelClass)) {
+            throw new InvalidArgumentException('The livewire-tagify modelClass must be an existing Eloquent model class.');
+        }
+
+        if (! is_subclass_of($this->modelClass, Model::class)) {
+            throw new InvalidArgumentException('The livewire-tagify modelClass must extend Illuminate\Database\Eloquent\Model.');
+        }
+
+        $model = new $this->modelClass();
+
+        foreach (['tags', 'syncTagsWithType', 'detachTag'] as $method) {
+            if (! method_exists($model, $method)) {
+                throw new InvalidArgumentException('The livewire-tagify modelClass must use Codekinz\LivewireTagify\Traits\HasTags.');
+            }
+        }
+
+        return $model;
+    }
+
+    protected function validateTagType(): void
+    {
+        if (! is_string($this->tagType) || ! preg_match('/\A[A-Za-z0-9:_-]{1,100}\z/', $this->tagType)) {
+            throw new InvalidArgumentException('The livewire-tagify tagType must be a non-empty string containing only letters, numbers, dashes, underscores, or colons.');
+        }
     }
 }

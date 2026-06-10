@@ -36,38 +36,20 @@ Laravel should auto-discover the service provider. If package discovery is disab
     Codekinz\LivewireTagify\LivewireTagifyServiceProvider::class,
 ],
 ```
-Publish the migration and config files
+Publish the config and migration files:
 ```bash
 php artisan vendor:publish --tag=livewire-tagify
 ```
-Run the migration
+
+The published migration safely prepares the tag tables. If `tags` or `taggables` already exist, it leaves them alone. If the `tags.color` column already exists, it leaves that alone too.
+
+Run the migration:
 ```bash
 php artisan migrate
 ```
 
-### Set up the Livewire component
-In order to use Livewire tagify, you will first need to create a Livewire component
-```bash
-php artisan make:livewire Tags
-```
-In Livewire Tags component, instead of extending the Livewire class you will need to extend the `LivewireTagify`. You Tags component should look like this
+On rollback, this package only removes the `color` column. It does not drop the `tags` or `taggables` tables because those tables may already belong to Spatie Laravel Tags or your app.
 
-```php
-<?php
-
-namespace App\Http\Livewire;
-
-use Livewire\Component;
-use Codekinz\LivewireTagify\Components\LivewireTagify;
-use Codekinz\LivewireTagify\Contracts\TagsContract;
-use Codekinz\LivewireTagify\Traits\InteractsWithTags;
-
-class Tags extends LivewireTagify implements TagsContract
-{
-    use InteractsWithTags;
-}
-
-```
 ### Add trait to Laravel Model
 This package uses <a href="https://spatie.be/docs/laravel-tags/v4/introduction" target="_blank">Laravel Spatie Tags</a> as an underlying package. Add this package's `HasTags` trait to your model.
 
@@ -87,22 +69,23 @@ class YourModel extends Model
 }
 ```
 ### Usage
-Now we are good to go. We just need to call our Livewire component in a blade file.
+Now we are good to go. We just need to call the package Livewire component in a blade file.
 ```blade
- @livewire('tags',
-        [
-            'modelClass' => App\Models\User::class,
-            'modelId' => 2,
-            'tagType' => 'flights'
-        ])
+@livewire('livewire-tagify', [
+    'modelClass' => App\Models\User::class,
+    'modelId' => 2,
+    'tagType' => 'flights',
+])
 ```
 Here is the explanation of parameters
-- `modelClass` is the class of the model that you want to associate with the tag
-- `modelId` is the record identifier i.e primary key value
-- `tagType` allows you to set up tags for multiple modules. For instance, you need to use tags for multiple modules like travel, bookings and flights then the `tagType` parameter will serve the purpose.
+- `modelClass` must be an Eloquent model class that uses `Codekinz\LivewireTagify\Traits\HasTags`
+- `modelId` must be an existing model record ID
+- `tagType` must be a non-empty string using only letters, numbers, dashes, underscores, or colons
+
+`tagType` lets you separate tags for different areas, such as `travel`, `bookings`, or `flights`.
 
 ## Configurations
-Configurations are available at `config/livewire-tagify.php`. You can change the configuration in this file globally or you can use this function in your `Tags` component if you want to have multiple tags component
+Configurations are available at `config/livewire-tagify.php`. You can change the configuration in this file globally or extend the package component when one screen needs custom settings.
 
 ### Frontend library
 
@@ -148,7 +131,9 @@ php artisan vendor:publish --tag=livewire-tagify-views
 
 ### Permissions
 
-Tag operations are enabled by default. You can disable any operation in `config/livewire-tagify.php`:
+Tag actions pass through three permission layers.
+
+Layer 1 is the operation toggle. Set an action to `false` to always block it:
 
 ```php
 'permissions' => [
@@ -160,7 +145,15 @@ Tag operations are enabled by default. You can disable any operation in `config/
 ],
 ```
 
-You can also connect operations to Laravel gates:
+You may also set an action to a gate name here. This is kept for convenience, but `permission_gates` is clearer:
+
+```php
+'permissions' => [
+    'delete' => 'delete-tags',
+],
+```
+
+Layer 2 is the configured Laravel gate. Put the gate name in `permission_gates`:
 
 ```php
 'permission_gates' => [
@@ -168,7 +161,27 @@ You can also connect operations to Laravel gates:
 ],
 ```
 
-If no gate is configured, the package checks your Laravel policy for `Spatie\Tags\Tag` when one exists. If no gate or policy exists, the operation is allowed after package validation and ownership checks pass.
+Then define that gate in your Laravel app, for example in `AuthServiceProvider`:
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
+use Spatie\Tags\Tag;
+
+Gate::define('delete-tags', function ($user, Tag $tag, Model $model, array $payload, ?string $tagType): bool {
+    return $user->can('update', $model);
+});
+```
+
+Gate arguments are always:
+
+```php
+[$tagOrTagClass, $taggableModel, $payload, $tagType]
+```
+
+For `create` and `read`, the first argument is `Spatie\Tags\Tag::class`. For `update`, `delete`, and `change_color`, it is the actual `Tag` model.
+
+Layer 3 is the `Spatie\Tags\Tag` policy fallback. If no gate is configured, the package checks your policy for `Spatie\Tags\Tag` when one exists:
 
 ```php
 public function update(?User $user, Tag $tag, Model $model): bool
@@ -177,22 +190,31 @@ public function update(?User $user, Tag $tag, Model $model): bool
 }
 ```
 
+Policy ability mapping:
+
+```php
+'create' => 'create'
+'read' => 'viewAny'
+'update' => 'update'
+'delete' => 'delete'
+'change_color' => 'update'
+```
+
+If no toggle blocks the action, no configured gate exists, and no matching policy method exists, the package allows the action after validation and ownership checks pass.
+
 The package also checks ownership before editing, deleting, detaching, or changing color. Browser-sent tag IDs and tag types are not trusted.
+
+If one screen needs custom settings, create your own Livewire component that extends the package component:
 
 ```php
 <?php
 
 namespace App\Http\Livewire;
 
-use Livewire\Component;
 use Codekinz\LivewireTagify\Components\LivewireTagify;
-use Codekinz\LivewireTagify\Contracts\TagsContract;
-use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireTagify implements TagsContract
+class Tags extends LivewireTagify
 {
-    use InteractsWithTags;
-
     protected function configurations(): array
     {
        return [
@@ -216,6 +238,12 @@ A. Just like previously, you need to click on the tag you will see a dropdown co
 
 Q. How to edit a tag?  
 A. Double click on a tag and edit it.
+
+## Upgrade Notes
+
+If you previously created a Livewire component only to extend `LivewireTagify` and implement `TagsContract`, you can now remove that wrapper and call `@livewire('livewire-tagify', [...])` directly. Keep a custom component only when you need to override `configurations()` or add your own Livewire behavior.
+
+The package migration now safely prepares the tag tables and adds `tags.color` only when needed. Rolling back this package removes only `tags.color`; it does not drop `tags` or `taggables`.
 
 ## Main Contributor
 - [Zain Farooq](https://www.linkedin.com/in/zain-farooq-b3a914147)

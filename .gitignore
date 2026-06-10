@@ -1,2 +1,9 @@
 /vendor/
 .idea
+*.sqlite
+tests/Browser/console/*
+!tests/Browser/console/.gitignore
+tests/Browser/screenshots/*
+!tests/Browser/screenshots/.gitignore
+tests/Browser/source/*
+!tests/Browser/source/.gitignore

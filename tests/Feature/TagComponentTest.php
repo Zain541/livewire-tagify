@@ -1,10 +1,13 @@
 <?php
 
+use Codekinz\LivewireTagify\Components\LivewireTagify as PackageLivewireTagify;
 use Codekinz\LivewireTagify\Tests\Support\TestModel;
 use Codekinz\LivewireTagify\Tests\Support\TestEmptyTagPolicy;
 use Codekinz\LivewireTagify\Tests\Support\TestTagPolicy;
 use Codekinz\LivewireTagify\Tests\Support\TestTagComponent;
+use Codekinz\LivewireTagify\Tests\Support\TestUntaggableModel;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\View\ViewException;
 use Livewire\Livewire;
 use Spatie\Tags\Tag;
 
@@ -23,6 +26,50 @@ it('can initialize and load existing tags', function () {
         'tagType' => 'firstType',
     ])->assertSee('Existing Tag');
 });
+
+it('can use the package component directly', function () {
+    $this->model->attachTag('Direct Tag', 'firstType');
+
+    Livewire::test(PackageLivewireTagify::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ])->assertSee('Direct Tag');
+});
+
+it('rejects model classes that are not eloquent models', function () {
+    Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => stdClass::class,
+        'tagType' => 'firstType',
+    ]);
+})->throws(ViewException::class);
+
+it('rejects models that do not support tags', function () {
+    $model = TestUntaggableModel::query()->create(['name' => 'Plain Item']);
+
+    Livewire::test(TestTagComponent::class, [
+        'modelId' => $model->id,
+        'modelClass' => TestUntaggableModel::class,
+        'tagType' => 'firstType',
+    ]);
+})->throws(ViewException::class);
+
+it('rejects missing models', function () {
+    Livewire::test(TestTagComponent::class, [
+        'modelId' => 999,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+})->throws(ViewException::class);
+
+it('rejects unsafe tag types', function () {
+    Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'first type',
+    ]);
+})->throws(ViewException::class);
 
 it('creates a new tag from the component action', function () {
     $component = Livewire::test(TestTagComponent::class, [
