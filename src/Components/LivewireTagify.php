@@ -2,9 +2,10 @@
 
 namespace Codekinz\LivewireTagify\Components;
 
+use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 use Livewire\Component;
 
-abstract class LivewireTagify extends Component
+class LivewireTagify extends Component
 {
-    abstract protected function configurations(): array;
+    use InteractsWithTags;
 }

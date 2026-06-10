@@ -45,29 +45,6 @@ Run the migration
 php artisan migrate
 ```
 
-### Set up the Livewire component
-In order to use Livewire tagify, you will first need to create a Livewire component
-```bash
-php artisan make:livewire Tags
-```
-In Livewire Tags component, instead of extending the Livewire class you will need to extend the `LivewireTagify`. You Tags component should look like this
-
-```php
-<?php
-
-namespace App\Http\Livewire;
-
-use Livewire\Component;
-use Codekinz\LivewireTagify\Components\LivewireTagify;
-use Codekinz\LivewireTagify\Contracts\TagsContract;
-use Codekinz\LivewireTagify\Traits\InteractsWithTags;
-
-class Tags extends LivewireTagify implements TagsContract
-{
-    use InteractsWithTags;
-}
-
-```
 ### Add trait to Laravel Model
 This package uses <a href="https://spatie.be/docs/laravel-tags/v4/introduction" target="_blank">Laravel Spatie Tags</a> as an underlying package. Add this package's `HasTags` trait to your model.
 
@@ -87,9 +64,9 @@ class YourModel extends Model
 }
 ```
 ### Usage
-Now we are good to go. We just need to call our Livewire component in a blade file.
+Now we are good to go. We just need to call the package Livewire component in a blade file.
 ```blade
- @livewire('tags',
+ @livewire('livewire-tagify',
         [
             'modelClass' => App\Models\User::class,
             'modelId' => 2,
@@ -102,7 +79,7 @@ Here is the explanation of parameters
 - `tagType` allows you to set up tags for multiple modules. For instance, you need to use tags for multiple modules like travel, bookings and flights then the `tagType` parameter will serve the purpose.
 
 ## Configurations
-Configurations are available at `config/livewire-tagify.php`. You can change the configuration in this file globally or you can use this function in your `Tags` component if you want to have multiple tags component
+Configurations are available at `config/livewire-tagify.php`. You can change the configuration in this file globally or extend the package component when one screen needs custom settings.
 
 ### Frontend library
 
@@ -179,20 +156,17 @@ public function update(?User $user, Tag $tag, Model $model): bool
 
 The package also checks ownership before editing, deleting, detaching, or changing color. Browser-sent tag IDs and tag types are not trusted.
 
+If one screen needs custom settings, create your own Livewire component that extends the package component:
+
 ```php
 <?php
 
 namespace App\Http\Livewire;
 
-use Livewire\Component;
 use Codekinz\LivewireTagify\Components\LivewireTagify;
-use Codekinz\LivewireTagify\Contracts\TagsContract;
-use Codekinz\LivewireTagify\Traits\InteractsWithTags;
 
-class Tags extends LivewireTagify implements TagsContract
+class Tags extends LivewireTagify
 {
-    use InteractsWithTags;
-
     protected function configurations(): array
     {
        return [

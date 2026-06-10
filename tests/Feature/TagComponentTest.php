@@ -1,5 +1,6 @@
 <?php
 
+use Codekinz\LivewireTagify\Components\LivewireTagify as PackageLivewireTagify;
 use Codekinz\LivewireTagify\Tests\Support\TestModel;
 use Codekinz\LivewireTagify\Tests\Support\TestEmptyTagPolicy;
 use Codekinz\LivewireTagify\Tests\Support\TestTagPolicy;
@@ -22,6 +23,16 @@ it('can initialize and load existing tags', function () {
         'modelClass' => TestModel::class,
         'tagType' => 'firstType',
     ])->assertSee('Existing Tag');
+});
+
+it('can use the package component directly', function () {
+    $this->model->attachTag('Direct Tag', 'firstType');
+
+    Livewire::test(PackageLivewireTagify::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ])->assertSee('Direct Tag');
 });
 
 it('creates a new tag from the component action', function () {
