@@ -24,7 +24,7 @@ it('can initialize and load existing tags', function () {
     ])->assertSee('Existing Tag');
 });
 
-it('creates a new tag when event is emitted', function () {
+it('creates a new tag from the component action', function () {
     $component = Livewire::test(TestTagComponent::class, [
         'modelId' => $this->model->id,
         'modelClass' => TestModel::class,
@@ -33,14 +33,14 @@ it('creates a new tag when event is emitted', function () {
 
     $tagifyPayload = [['value' => 'Awesome Feature']];
 
-    $component->emit('addNewTagEvent', $tagifyPayload);
+    $component->call('addNewTag', $tagifyPayload);
 
     expect($this->model->refresh()->tags)
         ->count()->toBe(1)
         ->first()->name->toBe('Awesome Feature');
 });
 
-it('removes a tag when event is emitted', function () {
+it('removes a tag from the component action', function () {
     $this->model->attachTag('Tag To Remove', 'firstType');
 
     $tag = $this->model->refresh()->tags->first();
@@ -51,12 +51,12 @@ it('removes a tag when event is emitted', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('removeTagEvent', ['value' => 'Tag To Remove', 'id' => $tag->id]);
+    $component->call('removeTag', ['value' => 'Tag To Remove', 'id' => $tag->id]);
 
     expect($this->model->refresh()->tags)->count()->toBe(0);
 });
 
-it('updates tag color when event is emitted', function () {
+it('updates tag color from the component action', function () {
     $this->model->attachTag('Design', 'firstType');
 
     $component = Livewire::test(TestTagComponent::class, [
@@ -66,7 +66,7 @@ it('updates tag color when event is emitted', function () {
     ]);
 
     $newColor = '#add8e6';
-    $component->emit('changeColorTagEvent', 'Design', 'firstType', $newColor);
+    $component->call('changeColorTag', 'Design', $newColor);
 
     $tag = Tag::findFromString('Design', 'firstType');
     expect($tag->color)->toBe('#add8e6');
@@ -82,7 +82,7 @@ it('permanently deletes a tag from the database', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('deleteTagEvent', $tag->id);
+    $component->call('deleteTag', $tag->id);
     expect(Tag::query()->where('id', $tag->id)->exists())->toBeFalse();
 });
 
@@ -155,7 +155,7 @@ it('does not create tags when create permission is disabled', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('addNewTagEvent', [['value' => 'Blocked Tag']]);
+    $component->call('addNewTag', [['value' => 'Blocked Tag']]);
 
     expect($this->model->refresh()->tags)->count()->toBe(0);
 });
@@ -167,7 +167,7 @@ it('does not create tags from invalid payloads', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('addNewTagEvent', [['value' => ''], ['name' => 'Missing Value'], ['value' => ['Nested']]]);
+    $component->call('addNewTag', [['value' => ''], ['name' => 'Missing Value'], ['value' => ['Nested']]]);
 
     expect($this->model->refresh()->tags)->count()->toBe(0);
 });
@@ -195,7 +195,7 @@ it('does not detach tags when delete permission is disabled', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('removeTagEvent', ['value' => 'Keep Attached']);
+    $component->call('removeTag', ['value' => 'Keep Attached']);
 
     expect($this->model->refresh()->tags)->count()->toBe(1);
 });
@@ -211,7 +211,7 @@ it('does not edit tags owned by another model', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('editTagEvent', ['id' => $otherTag->id, 'value' => 'Changed Tag']);
+    $component->call('editTag', ['id' => $otherTag->id, 'value' => 'Changed Tag']);
 
     expect(Tag::findFromString('Other Tag', 'firstType'))->not->toBeNull()
         ->and(Tag::findFromString('Changed Tag', 'firstType'))->toBeNull();
@@ -228,7 +228,7 @@ it('does not delete tags owned by another model', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('deleteTagEvent', $otherTag->id);
+    $component->call('deleteTag', $otherTag->id);
 
     expect(Tag::query()->where('id', $otherTag->id)->exists())->toBeTrue();
 });
@@ -243,7 +243,7 @@ it('does not trust browser supplied tag type when changing color', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('changeColorTagEvent', 'Design', 'secondType', '#add8e6');
+    $component->call('changeColorTag', 'Design', '#add8e6');
 
     expect(Tag::findFromString('Design', 'firstType')->color)->toBe('#add8e6')
         ->and(Tag::findFromString('Design', 'secondType')->color)->toBeNull();
@@ -258,7 +258,7 @@ it('does not change tag color to a color outside the configured list', function 
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('changeColorTagEvent', 'Design', 'firstType', '#ff0000');
+    $component->call('changeColorTag', 'Design', '#ff0000');
 
     expect(Tag::findFromString('Design', 'firstType')->color)->toBeNull();
 });
@@ -274,7 +274,7 @@ it('uses tag policies before mutating tags', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('editTagEvent', ['id' => $tag->id, 'value' => 'Blocked Rename']);
+    $component->call('editTag', ['id' => $tag->id, 'value' => 'Blocked Rename']);
 
     expect(Tag::findFromString('Original Tag', 'firstType'))->not->toBeNull()
         ->and(Tag::findFromString('Blocked Rename', 'firstType'))->toBeNull();
@@ -291,7 +291,7 @@ it('allows mutations when a tag policy exists without the relevant method', func
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('editTagEvent', ['id' => $tag->id, 'value' => 'Allowed Rename']);
+    $component->call('editTag', ['id' => $tag->id, 'value' => 'Allowed Rename']);
 
     expect(Tag::findFromString('Allowed Rename', 'firstType'))->not->toBeNull();
 });
@@ -312,7 +312,7 @@ it('uses configured permission gates before mutating tags', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->emit('editTagEvent', ['id' => $tag->id, 'value' => 'Blocked Rename']);
+    $component->call('editTag', ['id' => $tag->id, 'value' => 'Blocked Rename']);
 
     expect(Tag::findFromString('Original Tag', 'firstType'))->not->toBeNull()
         ->and(Tag::findFromString('Blocked Rename', 'firstType'))->toBeNull();

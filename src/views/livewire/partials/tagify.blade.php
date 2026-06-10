@@ -41,10 +41,10 @@
             tagData.style = '--tag-bg:' + tagData.color;
             this.tagify.replaceTag(tagElm, tagData);
             this.openDropdown = false;
-            Livewire.emit('changeColorTagEvent', this.activeTag.data.value, this.activeTag.data.type, color);
+            $wire.changeColorTag(this.activeTag.data.value, color);
         },
         deleteTag: function() {
-            Livewire.emit('deleteTagEvent', this.activeTag.data.id);
+            $wire.deleteTag(this.activeTag.data.id);
             this.tagify.removeTags(this.activeTag.data.value)
             this.tagify.whitelist = this.tagify.whitelist.filter(item => item.id !== this.activeTag.data.id);
             this.openDropdown = false;
@@ -67,7 +67,7 @@
                     var updatedTagId = e.detail.data.id;
                     var oldValue = e.detail.previousData.__originalData.value;
                     this.tagify.whitelist[this.tagify.whitelist.indexOf(oldValue)] = updatedValue;
-                    Livewire.emit('editTagEvent', e.detail.data);
+                    $wire.editTag(e.detail.data);
                     this.tagify.whitelist = this.tagify.whitelist.map(item => {
                         if (item.id === updatedTagId) {
                             return { ...item, value: updatedValue };
@@ -82,7 +82,7 @@
                 }
 
                 let onAddTag = (e) => {
-                    Livewire.emit('addNewTagEvent', e.detail.tagify.value);
+                    $wire.addNewTag(e.detail.tagify.value);
                     
                     const value = e.detail.data.value;
                     if (!this.tagify.whitelist.some(item => item.value === value)) {
@@ -91,7 +91,7 @@
                 }
 
                 let onRemoveTag = (e) => {
-                    Livewire.emit('removeTagEvent', e.detail.data);
+                    $wire.removeTag(e.detail.data);
                 }
 
                 this.tagify.on('add', onAddTag)
