@@ -35,17 +35,6 @@ trait InteractsWithTags
         $this->componentKey = (string) Str::uuid();
     }
 
-    protected function getListeners(): array
-    {
-        return [
-            'addNewTagEvent' => 'addNewTag',
-            'removeTagEvent' => 'removeTag',
-            'editTagEvent' => 'editTag',
-            'deleteTagEvent' => 'deleteTag',
-            'changeColorTagEvent' => 'changeColorTag',
-        ];
-    }
-
     public function addNewTag(array $tagArray): void
     {
         $tagValues = $this->validatedTagValues($tagArray);
@@ -57,7 +46,7 @@ trait InteractsWithTags
         $this->modelCollection->syncTagsWithType($tagValues, $this->tagType);
     }
 
-    public function changeColorTag(string $tag, string $tagType, string $color): void
+    public function changeColorTag(string $tag, string $color): void
     {
         if (! $this->isAllowedColor($color)) {
             return;
