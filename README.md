@@ -71,12 +71,11 @@ class YourModel extends Model
 ### Usage
 Now we are good to go. We just need to call the package Livewire component in a blade file.
 ```blade
- @livewire('livewire-tagify',
-        [
-            'modelClass' => App\Models\User::class,
-            'modelId' => 2,
-            'tagType' => 'flights'
-        ])
+@livewire('livewire-tagify', [
+    'modelClass' => App\Models\User::class,
+    'modelId' => 2,
+    'tagType' => 'flights',
+])
 ```
 Here is the explanation of parameters
 - `modelClass` must be an Eloquent model class that uses `Codekinz\LivewireTagify\Traits\HasTags`
