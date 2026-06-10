@@ -7,45 +7,56 @@ use Spatie\Tags\Tag;
 
 trait AuthorizesTagOperations
 {
-    protected function canPerformTagOperation(string $operation, ?Tag $tag = null, array $payload = []): bool
+    protected function allowsTagAction(string $action, ?Tag $tag = null, array $payload = []): bool
     {
-        $permission = config("livewire-tagify.permissions.{$operation}", true);
+        $permission = config("livewire-tagify.permissions.{$action}", true);
 
-        if ($permission === false) {
+        if ($permission === false || ! $this->configuredPermissionAllows($permission, $tag, $payload)) {
             return false;
         }
 
-        if (is_string($permission) && $permission !== '' && ! Gate::allows($permission, $this->tagOperationArguments($operation, $tag, $payload))) {
-            return false;
+        if ($gate = $this->configuredGate($action)) {
+            return $this->gateAllows($gate, $tag, $payload);
         }
 
-        $gate = config("livewire-tagify.permission_gates.{$operation}");
-
-        if (is_string($gate) && $gate !== '') {
-            return Gate::allows($gate, $this->tagOperationArguments($operation, $tag, $payload));
-        }
-
-        return $this->tagPolicyAllows($operation, $tag, $payload);
+        return $this->tagPolicyAllows($action, $tag, $payload);
     }
 
-    protected function tagPolicyAllows(string $operation, ?Tag $tag, array $payload): bool
+    protected function configuredPermissionAllows(mixed $permission, ?Tag $tag, array $payload): bool
+    {
+        if (! is_string($permission) || $permission === '') {
+            return true;
+        }
+
+        return $this->gateAllows($permission, $tag, $payload);
+    }
+
+    protected function configuredGate(string $action): ?string
+    {
+        $gate = config("livewire-tagify.permission_gates.{$action}");
+
+        return is_string($gate) && $gate !== '' ? $gate : null;
+    }
+
+    protected function tagPolicyAllows(string $action, ?Tag $tag, array $payload): bool
+    {
+        $ability = $this->tagPolicyAbility($action);
+
+        if (! $this->tagPolicyHasAbility($ability)) {
+            return true;
+        }
+
+        return $this->gateAllows($ability, $tag, $payload);
+    }
+
+    protected function tagPolicyHasAbility(string $ability): bool
     {
         $policy = Gate::getPolicyFor(Tag::class);
 
-        if ($policy === null) {
-            return true;
-        }
-
-        $ability = $this->tagPolicyAbility($operation);
-
-        if (! is_callable([$policy, $ability])) {
-            return true;
-        }
-
-        return Gate::allows($ability, $this->tagOperationArguments($operation, $tag, $payload));
+        return $policy !== null && is_callable([$policy, $ability]);
     }
 
-    protected function tagPolicyAbility(string $operation): string
+    protected function tagPolicyAbility(string $action): string
     {
         return [
             'create' => 'create',
@@ -53,10 +64,15 @@ trait AuthorizesTagOperations
             'update' => 'update',
             'delete' => 'delete',
             'change_color' => 'update',
-        ][$operation] ?? $operation;
+        ][$action] ?? $action;
     }
 
-    protected function tagOperationArguments(string $operation, ?Tag $tag, array $payload): array
+    protected function gateAllows(string $ability, ?Tag $tag, array $payload): bool
+    {
+        return Gate::inspect($ability, $this->tagOperationArguments($tag, $payload))->allowed();
+    }
+
+    protected function tagOperationArguments(?Tag $tag, array $payload): array
     {
         $subject = $tag ?? Tag::class;
 

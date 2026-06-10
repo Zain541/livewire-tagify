@@ -1,3 +1,5 @@
+@use(Illuminate\Support\Js)
+
 <div x-ref="panel"
      x-show="openDropdown"
      x-transition.opacity.duration.150ms
@@ -21,7 +23,7 @@
             <div class="livewire-tagify__color-list">
                 @foreach ($configuration['colors'] as $color)
                     <button type="button"
-                            x-on:click="changeColor('{{ $color }}')"
+                            x-on:click="changeColor({{ Js::from($color) }})"
                             class="livewire-tagify__color-button"
                             style="background: {{ $color }};"
                             title="{{ $color }}">

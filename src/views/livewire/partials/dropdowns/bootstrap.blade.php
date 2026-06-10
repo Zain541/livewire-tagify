@@ -1,3 +1,5 @@
+@use(Illuminate\Support\Js)
+
 <div x-ref="panel"
      x-show="openDropdown"
      x-transition.opacity.duration.150ms
@@ -23,7 +25,7 @@
             <div class="d-flex flex-wrap gap-2">
                 @foreach ($configuration['colors'] as $color)
                     <button type="button"
-                            x-on:click="changeColor('{{ $color }}')"
+                            x-on:click="changeColor({{ Js::from($color) }})"
                             class="btn rounded-circle border shadow-sm p-0"
                             style="background: {{ $color }}; width: 1.5rem; height: 1.5rem;"
                             title="{{ $color }}">

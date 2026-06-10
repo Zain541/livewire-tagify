@@ -1,3 +1,5 @@
+@use(Illuminate\Support\Js)
+
 <div x-ref="panel"
      x-show="openDropdown"
      x-transition.opacity.duration.150ms
@@ -32,7 +34,7 @@
 
             <div class="flex flex-wrap gap-1.5">
                 @foreach ($configuration['colors'] as $color)
-                    <button x-on:click="changeColor('{{ $color }}')"
+                    <button x-on:click="changeColor({{ Js::from($color) }})"
                             class="w-6 h-6 rounded-full shadow-sm ring-1 ring-gray-900/5 hover:scale-110 hover:ring-2 hover:ring-offset-1 hover:ring-[var(--dropdown-item-text--hover)] transition-all duration-200 ease-out focus:outline-none"
                             style="background: {{ $color }};"
                             title="{{ $color }}">

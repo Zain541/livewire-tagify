@@ -1,107 +1,17 @@
+@use(Illuminate\Support\Js)
+
 <div wire:ignore class="livewire-tagify" data-livewire-tagify-frontend="{{ $frontendLibrary }}">
     @php
         $configuration = $this->prepareConfigurations();
-        $whitelistJson = json_encode($this->prepareWhitelist(), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG);
+        $componentOptions = [
+            'defaultColor' => $configuration['default_color'],
+            'whitelist' => $this->prepareWhitelist(),
+        ];
     @endphp
-    <div class="tagify-wrapper" style="position:relative" wire:key='{{ $componentKey }}' x-data="{
-        tagify: null,
-        openDropdown: false,
-        defaultColor: '{{ $configuration['default_color'] }}',
-        activeTag: null,
-        tagInput: null,
-        whitelist: [],
-
-        initTagify: function() {
-
-            let transformTag = (tagData) => {
-                var color = this.defaultColor;
-                if (tagData.hasOwnProperty('color')) {
-                    color = tagData.color;
-                }
-                tagData.style = '--tag-bg:' + color;
-
-            }
-            return new Tagify(this.tagInput, {
-                whitelist: [],
-                transformTag: transformTag,
-                dropdown: {
-                    enabled: 0
-                }
-            });
-        },
-        toggle: function() {
-            if (this.openDropdown) {
-                return this.close()
-            }
-            this.openDropdown = true
-        },
-        changeColor: function(color) {
-            const { tag: tagElm, data: tagData } = this.activeTag;
-            tagData.color = color;
-            tagData.style = '--tag-bg:' + tagData.color;
-            this.tagify.replaceTag(tagElm, tagData);
-            this.openDropdown = false;
-            $wire.changeColorTag(this.activeTag.data.value, color);
-        },
-        deleteTag: function() {
-            $wire.deleteTag(this.activeTag.data.id);
-            this.tagify.removeTags(this.activeTag.data.value)
-            this.tagify.whitelist = this.tagify.whitelist.filter(item => item.id !== this.activeTag.data.id);
-            this.openDropdown = false;
-        },
-        close: function() {
-            if (!this.openDropdown) return
-            this.openDropdown = false
-        },
-
-        init() {
-            this.$nextTick(() => {
-
-                this.tagInput = this.$refs.tagInput;
-                this.tagify = this.initTagify();
-                this.whitelist = JSON.parse('{{ $whitelistJson }}');
-                this.tagify.whitelist = this.whitelist;
-
-                let onTagEdit = (e) => {
-                    var updatedValue = e.detail.data.value;
-                    var updatedTagId = e.detail.data.id;
-                    var oldValue = e.detail.previousData.__originalData.value;
-                    this.tagify.whitelist[this.tagify.whitelist.indexOf(oldValue)] = updatedValue;
-                    $wire.editTag(e.detail.data);
-                    this.tagify.whitelist = this.tagify.whitelist.map(item => {
-                        if (item.id === updatedTagId) {
-                            return { ...item, value: updatedValue };
-                        }
-                        return item;
-                    });
-
-                }
-                let onTagClick = (e) => {
-                    this.activeTag = e.detail;
-                    this.toggle();
-                }
-
-                let onAddTag = (e) => {
-                    $wire.addNewTag(e.detail.tagify.value);
-                    
-                    const value = e.detail.data.value;
-                    if (!this.tagify.whitelist.some(item => item.value === value)) {
-                        this.tagify.whitelist.push({ value, color: this.defaultColor });
-                    }
-                }
-
-                let onRemoveTag = (e) => {
-                    $wire.removeTag(e.detail.data);
-                }
-
-                this.tagify.on('add', onAddTag)
-                    .on('remove', onRemoveTag)
-                    .on('edit:updated', onTagEdit)
-                    .on('click', onTagClick);
-
-            });
-        }
-    }">
+    <div class="tagify-wrapper"
+         style="position:relative"
+         wire:key='{{ $componentKey }}'
+         x-data="livewireTagify({{ Js::from($componentOptions) }})">
 
         <input type="text" x-ref="tagInput" value='{{ $this->getModelTags() }}'>
 
