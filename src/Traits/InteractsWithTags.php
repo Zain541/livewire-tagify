@@ -3,6 +3,7 @@
 namespace Codekinz\LivewireTagify\Traits;
 
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Spatie\Tags\Tag;
@@ -14,20 +15,16 @@ trait InteractsWithTags
     use ResolvesTagifyConfiguration;
     use ValidatesTagPayloads;
 
-    /** @var string */
-    public $componentKey;
+    public string $componentKey;
 
     /** @var class-string */
-    public $modelClass;
+    public string $modelClass;
 
-    /** @var int|string */
-    public $modelId;
+    public int|string $modelId;
 
-    /** @var \Illuminate\Database\Eloquent\Model */
-    public $modelCollection;
+    public Model $modelCollection;
 
-    /** @var string|null */
-    public $tagType;
+    public ?string $tagType = null;
 
     public function mount(): void
     {
