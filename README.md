@@ -131,7 +131,9 @@ php artisan vendor:publish --tag=livewire-tagify-views
 
 ### Permissions
 
-Tag operations are enabled by default. You can disable any operation in `config/livewire-tagify.php`:
+Tag actions pass through three permission layers.
+
+Layer 1 is the operation toggle. Set an action to `false` to always block it:
 
 ```php
 'permissions' => [
@@ -143,7 +145,15 @@ Tag operations are enabled by default. You can disable any operation in `config/
 ],
 ```
 
-You can also connect operations to Laravel gates:
+You may also set an action to a gate name here. This is kept for convenience, but `permission_gates` is clearer:
+
+```php
+'permissions' => [
+    'delete' => 'delete-tags',
+],
+```
+
+Layer 2 is the configured Laravel gate. Put the gate name in `permission_gates`:
 
 ```php
 'permission_gates' => [
@@ -151,7 +161,27 @@ You can also connect operations to Laravel gates:
 ],
 ```
 
-If no gate is configured, the package checks your Laravel policy for `Spatie\Tags\Tag` when one exists. If no gate or policy exists, the operation is allowed after package validation and ownership checks pass.
+Then define that gate in your Laravel app, for example in `AuthServiceProvider`:
+
+```php
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
+use Spatie\Tags\Tag;
+
+Gate::define('delete-tags', function ($user, Tag $tag, Model $model, array $payload, ?string $tagType): bool {
+    return $user->can('update', $model);
+});
+```
+
+Gate arguments are always:
+
+```php
+[$tagOrTagClass, $taggableModel, $payload, $tagType]
+```
+
+For `create` and `read`, the first argument is `Spatie\Tags\Tag::class`. For `update`, `delete`, and `change_color`, it is the actual `Tag` model.
+
+Layer 3 is the `Spatie\Tags\Tag` policy fallback. If no gate is configured, the package checks your policy for `Spatie\Tags\Tag` when one exists:
 
 ```php
 public function update(?User $user, Tag $tag, Model $model): bool
@@ -159,6 +189,18 @@ public function update(?User $user, Tag $tag, Model $model): bool
     return $user?->can('update', $model) ?? false;
 }
 ```
+
+Policy ability mapping:
+
+```php
+'create' => 'create'
+'read' => 'viewAny'
+'update' => 'update'
+'delete' => 'delete'
+'change_color' => 'update'
+```
+
+If no toggle blocks the action, no configured gate exists, and no matching policy method exists, the package allows the action after validation and ownership checks pass.
 
 The package also checks ownership before editing, deleting, detaching, or changing color. Browser-sent tag IDs and tag types are not trusted.
 
