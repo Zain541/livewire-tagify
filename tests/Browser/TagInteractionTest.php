@@ -121,6 +121,26 @@ class TagInteractionTest extends DuskTestCase
     }
 
     /** @test */
+    public function it_updates_a_tag_color_using_the_custom_dropdown()
+    {
+        $this->model->attachTag('Color Me', 'firstType');
+
+        $this->browse(function (Browser $browser) {
+            $browser->visit('/dusk-test')
+                ->waitFor('.tagify', 5)
+                ->assertSee('Color Me')
+                ->click('.tagify__tag')
+                ->waitFor('.tagify__dropdown', 2)
+                ->click('button[title="coral"]')
+                ->pause(500);
+        });
+
+        $tag = Tag::findFromString('Color Me', 'firstType');
+
+        $this->assertSame('#E8634A', $tag->color);
+    }
+
+    /** @test */
     public function it_removes_a_tag_clicking_the_cross_button()
     {
         $this->model->attachTag('Remove Me', 'firstType');

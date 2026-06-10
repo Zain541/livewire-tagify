@@ -65,11 +65,11 @@ it('updates tag color from the component action', function () {
         'tagType' => 'firstType',
     ]);
 
-    $newColor = '#add8e6';
+    $newColor = '#E8634A';
     $component->call('changeColorTag', 'Design', $newColor);
 
     $tag = Tag::findFromString('Design', 'firstType');
-    expect($tag->color)->toBe('#add8e6');
+    expect($tag->color)->toBe('#E8634A');
 });
 
 it('permanently deletes a tag from the database', function () {
@@ -243,9 +243,9 @@ it('does not trust browser supplied tag type when changing color', function () {
         'tagType' => 'firstType',
     ]);
 
-    $component->call('changeColorTag', 'Design', '#add8e6');
+    $component->call('changeColorTag', 'Design', '#E8634A');
 
-    expect(Tag::findFromString('Design', 'firstType')->color)->toBe('#add8e6')
+    expect(Tag::findFromString('Design', 'firstType')->color)->toBe('#E8634A')
         ->and(Tag::findFromString('Design', 'secondType')->color)->toBeNull();
 });
 

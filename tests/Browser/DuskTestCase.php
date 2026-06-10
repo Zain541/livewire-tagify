@@ -71,6 +71,13 @@ class DuskTestCase extends TestCase
     {
         Livewire::component('test-tag-component', TestTagComponent::class);
 
+        $router->get('/vendor/livewire-tagify/livewire-tagify.js', function () {
+            return response()->file(
+                __DIR__.'/../../src/js/livewire-tagify.js',
+                ['Content-Type' => 'application/javascript']
+            );
+        });
+
         $router->get('/dusk-test', function () {
             return view('test-layout');
         });

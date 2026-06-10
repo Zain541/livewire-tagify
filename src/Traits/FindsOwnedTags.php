@@ -6,10 +6,7 @@ use Spatie\Tags\Tag;
 
 trait FindsOwnedTags
 {
-    /**
-     * @param  int|string  $tagId
-     */
-    protected function findOwnedTagById($tagId): ?Tag
+    protected function findOwnedTagById(int|string $tagId): ?Tag
     {
         if (! $this->isValidTagId($tagId)) {
             return null;

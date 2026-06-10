@@ -17,7 +17,7 @@ trait InteractsWithTags
 
     public string $componentKey;
 
-    /** @var class-string */
+    /** @var class-string<Model> */
     public string $modelClass;
 
     public int|string $modelId;
@@ -32,49 +32,48 @@ trait InteractsWithTags
         $this->componentKey = (string) Str::uuid();
     }
 
-    public function addNewTag(array $tagArray): void
+    public function addNewTag(array $tagArray): bool
     {
         $tagValues = $this->validatedTagValues($tagArray);
 
-        if ($tagValues === [] || ! $this->canPerformTagOperation('create', null, ['values' => $tagValues])) {
-            return;
+        if ($tagValues === [] || ! $this->allowsTagAction('create', null, ['values' => $tagValues])) {
+            return false;
         }
 
         $this->modelCollection->syncTagsWithType($tagValues, $this->tagType);
+
+        return true;
     }
 
-    public function changeColorTag(string $tag, string $color): void
+    public function changeColorTag(string $tag, string $color): bool
     {
         if (! $this->isAllowedColor($color)) {
-            return;
+            return false;
         }
 
         $record = $this->findOwnedTagByValue($tag);
 
-        if (! $record || ! $this->canPerformTagOperation('change_color', $record, ['color' => $color])) {
-            return;
+        if (! $record || ! $this->allowsTagAction('change_color', $record, ['color' => $color])) {
+            return false;
         }
 
-        $record->update(['color' => $color]);
+        return $record->update(['color' => $color]);
     }
 
-    /**
-     * @param  int|string  $tagId
-     */
-    public function deleteTag($tagId): void
+    public function deleteTag(int|string $tagId): bool
     {
         $record = $this->findOwnedTagById($tagId);
 
-        if (! $record || ! $this->canPerformTagOperation('delete', $record)) {
-            return;
+        if (! $record || ! $this->allowsTagAction('delete', $record)) {
+            return false;
         }
 
-        $record->delete();
+        return (bool) $record->delete();
     }
 
     public function getModelTags(): Collection
     {
-        if (! $this->canPerformTagOperation('read')) {
+        if (! $this->allowsTagAction('read')) {
             return collect();
         }
 
@@ -87,45 +86,48 @@ trait InteractsWithTags
                     'id' => $tag->id,
                     'value' => $tag->name,
                     'type' => $tag->type,
-                    'color' => $tag->color === null ? 'lightgray' : $tag->color,
+                    'color' => $tag->color === null ? '#2B7CD1' : $tag->color,
                 ];
             });
     }
 
-    public function removeTag(array $tagsArray): void
+    public function removeTag(array $tagsArray): bool
     {
         if (! isset($tagsArray['value']) || ! $this->isValidTagValue($tagsArray['value'])) {
-            return;
+            return false;
         }
 
         $record = $this->findOwnedTagByValue($tagsArray['value']);
 
-        if (! $record || ! $this->canPerformTagOperation('delete', $record)) {
-            return;
+        if (! $record || ! $this->allowsTagAction('delete', $record)) {
+            return false;
         }
 
         $this->modelCollection->detachTag(trim($tagsArray['value']), $this->tagType);
+
+        return true;
     }
 
-    public function editTag(array $tagPayload): void
+    public function editTag(array $tagPayload): bool
     {
         if (! isset($tagPayload['id'], $tagPayload['value']) || ! $this->isValidTagValue($tagPayload['value'])) {
-            return;
+            return false;
         }
 
         $record = $this->findOwnedTagById($tagPayload['id']);
 
-        if (! $record || ! $this->canPerformTagOperation('update', $record, ['value' => $tagPayload['value']])) {
-            return;
+        if (! $record || ! $this->allowsTagAction('update', $record, ['value' => $tagPayload['value']])) {
+            return false;
         }
 
         $record->name = trim($tagPayload['value']);
-        $record->save();
+
+        return $record->save();
     }
 
     public function prepareWhitelist(): array
     {
-        if (! $this->canPerformTagOperation('read')) {
+        if (! $this->allowsTagAction('read')) {
             return [];
         }
 
@@ -135,7 +137,7 @@ trait InteractsWithTags
                 return [
                     'id' => $tag->id,
                     'value' => $tag->name,
-                    'color' => $tag->color === null ? 'lightgray' : $tag->color,
+                    'color' => $tag->color === null ? '#2B7CD1' : $tag->color,
                 ];
             })
             ->values()

@@ -13,18 +13,20 @@ composer require codekinz/livewire-tagify
 ```
 
 ## Prerequisite
-- Laravel 7.x or higher
-- Livewire 2.x or higher
+- PHP 8.1 or higher
+- A Laravel version supported by Livewire 4
+- Livewire 4.x
 - Alpine Js 3.x or higher
 - Tagify 3.x or higher
-- Tailwind 2.x or higher
+- Spatie Laravel Tags 4.x
+- Tailwind, Bootstrap, or your own CSS
 
 
 ## Getting Started
 
 ### Setup
 
-1. After installing the package via Composer, you may need to add the service provider to your `config/app.php` file:
+Laravel should auto-discover the service provider. If package discovery is disabled, add it manually:
 
 ```php
 // config/app.php
@@ -67,7 +69,7 @@ class Tags extends LivewireTagify implements TagsContract
 
 ```
 ### Add trait to Laravel Model
-This package uses <a href="https://spatie.be/docs/laravel-tags/v4/introduction" target="_blank">Laravel Spatie Tags</a> as an underlying package. So, in order to use its functionality, you need to use this Trait `HasSpatieTags` in your model class.
+This package uses <a href="https://spatie.be/docs/laravel-tags/v4/introduction" target="_blank">Laravel Spatie Tags</a> as an underlying package. Add this package's `HasTags` trait to your model.
 
 ```php
 <?php
@@ -87,7 +89,7 @@ class YourModel extends Model
 ### Usage
 Now we are good to go. We just need to call our Livewire component in a blade file.
 ```blade
- @livewire('dashboard',
+ @livewire('tags',
         [
             'modelClass' => App\Models\User::class,
             'modelId' => 2,
@@ -124,7 +126,19 @@ Use framework-neutral markup if you want to write your own CSS:
 'frontend_library' => 'none',
 ```
 
-The package only changes the rendered markup/classes. Your app still needs to load Alpine and Tagify. If you choose `tailwind` or `bootstrap`, your app must also load that frontend library.
+The package only changes the rendered markup/classes. Your app still needs to load Tagify, this package's JavaScript, and Alpine. If you choose `tailwind` or `bootstrap`, your app must also load that frontend library.
+
+Publish and load the package JavaScript before Alpine starts:
+
+```bash
+php artisan vendor:publish --tag=livewire-tagify-assets
+```
+
+```blade
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+<script src="{{ asset('vendor/livewire-tagify/livewire-tagify.js') }}"></script>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+```
 
 You can publish the package views if you need to customize the markup:
 

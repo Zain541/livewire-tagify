@@ -2,55 +2,58 @@
 
 namespace Codekinz\LivewireTagify\Traits;
 
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+
 trait ValidatesTagPayloads
 {
     protected function validatedTagValues(array $tagArray): array
     {
-        if (! is_array($tagArray)) {
-            return [];
-        }
-
-        $values = [];
-
-        foreach ($tagArray as $tag) {
-            if (! is_array($tag) || ! isset($tag['value']) || ! $this->isValidTagValue($tag['value'])) {
-                continue;
-            }
-
-            $values[] = trim($tag['value']);
-        }
-
-        return array_values(array_unique($values));
+        return collect($tagArray)
+            ->map(fn (mixed $tag): mixed => $this->tagValueFromPayload($tag))
+            ->filter(fn (mixed $value): bool => $this->isValidTagValue($value))
+            ->unique()
+            ->values()
+            ->all();
     }
 
-    /**
-     * @param  int|string  $tagId
-     */
-    protected function isValidTagId($tagId): bool
+    protected function tagValueFromPayload(mixed $tag): mixed
     {
-        return is_int($tagId) || (is_string($tagId) && ctype_digit($tagId));
+        if (! is_array($tag) || ! array_key_exists('value', $tag)) {
+            return null;
+        }
+
+        return is_string($tag['value']) ? trim($tag['value']) : $tag['value'];
     }
 
-    /**
-     * @param  mixed  $value
-     */
-    protected function isValidTagValue($value): bool
+    protected function isValidTagId(int|string $tagId): bool
+    {
+        return Validator::make(
+            ['id' => $tagId],
+            ['id' => ['required', 'integer']]
+        )->passes();
+    }
+
+    protected function isValidTagValue(mixed $value): bool
     {
         if (! is_string($value)) {
             return false;
         }
 
-        $value = trim($value);
-
-        return $value !== '' && strlen($value) <= (int) config('livewire-tagify.max_tag_length', 255);
+        return Validator::make(
+            ['value' => trim($value)],
+            ['value' => ['required', 'string', 'max:'.(int) config('livewire-tagify.max_tag_length', 255)]]
+        )->passes();
     }
 
     protected function isAllowedColor(string $color): bool
     {
-        if (! is_string($color)) {
-            return false;
-        }
+        $allowed = array_values($this->preparedConfiguration('colors', []));
+        $darkColors = array_values($this->preparedConfiguration('dark_colors', []));
 
-        return in_array($color, array_values($this->preparedConfiguration('colors', [])), true);
+        return Validator::make(
+            ['color' => $color],
+            ['color' => ['required', 'string', Rule::in(array_merge($allowed, $darkColors))]]
+        )->passes();
     }
 }
