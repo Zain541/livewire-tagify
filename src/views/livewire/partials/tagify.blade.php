@@ -1,6 +1,7 @@
 <div wire:ignore class="livewire-tagify" data-livewire-tagify-frontend="{{ $frontendLibrary }}">
     @php
         $configuration = $this->prepareConfigurations();
+        $whitelistJson = json_encode($this->prepareWhitelist(), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG);
     @endphp
     <div class="tagify-wrapper" style="position:relative" wire:key='{{ $componentKey }}' x-data="{
         tagify: null,
@@ -45,7 +46,7 @@
         deleteTag: function() {
             Livewire.emit('deleteTagEvent', this.activeTag.data.id);
             this.tagify.removeTags(this.activeTag.data.value)
-            this.tagify.whitelist = this.tagify.whitelist.filter(item => item.id != this.activeTag.id);
+            this.tagify.whitelist = this.tagify.whitelist.filter(item => item.id !== this.activeTag.data.id);
             this.openDropdown = false;
         },
         close: function() {
@@ -58,7 +59,7 @@
 
                 this.tagInput = this.$refs.tagInput;
                 this.tagify = this.initTagify();
-                this.whitelist = [{!! $this->prepareWhitelist() !!}];
+                this.whitelist = JSON.parse('{{ $whitelistJson }}');
                 this.tagify.whitelist = this.whitelist;
 
                 let onTagEdit = (e) => {

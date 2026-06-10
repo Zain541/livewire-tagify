@@ -38,6 +38,11 @@
         "laravel/dusk": "^8.3",
         "orchestra/testbench-dusk": "^8.36"
     },
+    "scripts": {
+        "format": "pint",
+        "test": "pest",
+        "test:unit": "pest tests/Feature tests/Unit"
+    },
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true
