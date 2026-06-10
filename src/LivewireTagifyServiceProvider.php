@@ -16,7 +16,7 @@ class LivewireTagifyServiceProvider extends ServiceProvider
 
         $this->publishes([
             __DIR__.'/Config/livewire-tagify.php' => config_path('livewire-tagify.php'),
-            __DIR__.'/Database/Migrations/create_tags_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_tags_table.php'),
+            __DIR__.'/Database/Migrations/prepare_tag_tables.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_prepare_tag_tables.php'),
             __DIR__.'/js/livewire-tagify.js' => public_path('vendor/livewire-tagify/livewire-tagify.js'),
         ], 'livewire-tagify');
 
@@ -25,7 +25,7 @@ class LivewireTagifyServiceProvider extends ServiceProvider
         ], 'livewire-tagify-config');
 
         $this->publishes([
-            __DIR__.'/Database/Migrations/create_tags_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_tags_table.php'),
+            __DIR__.'/Database/Migrations/prepare_tag_tables.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_prepare_tag_tables.php'),
         ], 'livewire-tagify-migrations');
 
         $this->publishes([
