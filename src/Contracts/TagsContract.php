@@ -9,26 +9,26 @@ interface TagsContract
     public function prepareConfigurations(): array;
 
 
-    public function addNewTag($tagArray): void;
+    public function addNewTag(array $tagArray): void;
 
 
-    public function changeColorTag($tag, $tagType, $color): void;
+    public function changeColorTag(string $tag, string $tagType, string $color): void;
 
 
+    /**
+     * @param  int|string  $tagId
+     */
     public function deleteTag($tagId): void;
 
 
     public function getModelTags(): Collection;
 
 
-    public function removeTag($tagsArray): void;
+    public function removeTag(array $tagsArray): void;
 
 
-    public function editTag(array $objectToBeArray): void;
+    public function editTag(array $tagPayload): void;
 
-    public function prepareWhitelist(): string;
-
-
-    public function prepareTransformTag(): string;
+    public function prepareWhitelist(): array;
 
 }

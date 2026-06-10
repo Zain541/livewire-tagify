@@ -6,12 +6,9 @@ use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 use Codekinz\LivewireTagify\Components\LivewireTagify;
 
-// namespace WireElements\Pro\Components\Modal\Foundation;
-
-
 class LivewireTagifyServiceProvider extends ServiceProvider
 {
-    public function boot()
+    public function boot(): void
     {
         $this->loadRoutesFrom(__DIR__  .   '/routes/web.php');
         $this->loadViewsFrom(__DIR__. '/views', 'livewire-tagify');
@@ -35,9 +32,8 @@ class LivewireTagifyServiceProvider extends ServiceProvider
         ], ['livewire-tagify', 'livewire-tagify-views']);
     }
 
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/Config/livewire-tagify.php', 'livewire-tagify');
     }
-
 }
