@@ -132,6 +132,39 @@ You can publish the package views if you need to customize the markup:
 php artisan vendor:publish --tag=livewire-tagify-views
 ```
 
+### Permissions
+
+Tag operations are enabled by default. You can disable any operation in `config/livewire-tagify.php`:
+
+```php
+'permissions' => [
+    'create' => true,
+    'read' => true,
+    'update' => true,
+    'delete' => true,
+    'change_color' => true,
+],
+```
+
+You can also connect operations to Laravel gates:
+
+```php
+'permission_gates' => [
+    'delete' => 'delete-tags',
+],
+```
+
+If no gate is configured, the package checks your Laravel policy for `Spatie\Tags\Tag` when one exists. If no gate or policy exists, the operation is allowed after package validation and ownership checks pass.
+
+```php
+public function update(?User $user, Tag $tag, Model $model): bool
+{
+    return $user?->can('update', $model) ?? false;
+}
+```
+
+The package also checks ownership before editing, deleting, detaching, or changing color. Browser-sent tag IDs and tag types are not trusted.
+
 ```php
 <?php
 

@@ -20,4 +20,22 @@ return [
         'gold' => '#ffd700',
     ],
     'default_color' => 'lightgray',
+
+    'max_tag_length' => 255,
+
+    'permissions' => [
+        'create' => true,
+        'read' => true,
+        'update' => true,
+        'delete' => true,
+        'change_color' => true,
+    ],
+
+    'permission_gates' => [
+        'create' => null,
+        'read' => null,
+        'update' => null,
+        'delete' => null,
+        'change_color' => null,
+    ],
 ];

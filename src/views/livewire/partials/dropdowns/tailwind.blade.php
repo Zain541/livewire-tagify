@@ -19,7 +19,7 @@
             </div>
 
             <span class="font-medium text-xs text-gray-600 group-hover:text-[var(--tag-remove-btn-bg--hover)]">
-                Delete Tag
+                Delete Tag Permanently
             </span>
         </button>
 

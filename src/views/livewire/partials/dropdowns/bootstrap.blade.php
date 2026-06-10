@@ -10,7 +10,7 @@
         <button type="button"
                 x-on:click="deleteTag()"
                 class="tagify__dropdown__item btn btn-light text-danger d-flex align-items-center gap-2 w-100 text-start">
-            Delete Tag
+            Delete Tag Permanently
         </button>
 
         <hr class="my-1">
