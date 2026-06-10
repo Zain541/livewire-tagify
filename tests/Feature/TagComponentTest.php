@@ -1,7 +1,10 @@
 <?php
 
 use Codekinz\LivewireTagify\Tests\Support\TestModel;
+use Codekinz\LivewireTagify\Tests\Support\TestEmptyTagPolicy;
+use Codekinz\LivewireTagify\Tests\Support\TestTagPolicy;
 use Codekinz\LivewireTagify\Tests\Support\TestTagComponent;
+use Illuminate\Support\Facades\Gate;
 use Livewire\Livewire;
 use Spatie\Tags\Tag;
 
@@ -62,11 +65,11 @@ it('updates tag color when event is emitted', function () {
         'tagType' => 'firstType',
     ]);
 
-    $newColor = '#FF0000';
+    $newColor = '#add8e6';
     $component->emit('changeColorTagEvent', 'Design', 'firstType', $newColor);
 
     $tag = Tag::findFromString('Design', 'firstType');
-    expect($tag->color)->toBe('#FF0000');
+    expect($tag->color)->toBe('#add8e6');
 });
 
 it('permanently deletes a tag from the database', function () {
@@ -141,4 +144,176 @@ it('falls back to tailwind for an unsupported frontend library', function () {
         ->and($component->instance()->frontendView())->toBe('livewire-tagify::livewire.tailwind');
 
     $component->assertSeeHtml('data-livewire-tagify-dropdown="tailwind"');
+});
+
+it('does not create tags when create permission is disabled', function () {
+    config()->set('livewire-tagify.permissions.create', false);
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('addNewTagEvent', [['value' => 'Blocked Tag']]);
+
+    expect($this->model->refresh()->tags)->count()->toBe(0);
+});
+
+it('does not create tags from invalid payloads', function () {
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('addNewTagEvent', [['value' => ''], ['name' => 'Missing Value'], ['value' => ['Nested']]]);
+
+    expect($this->model->refresh()->tags)->count()->toBe(0);
+});
+
+it('does not expose tags when read permission is disabled', function () {
+    $this->model->attachTag('Hidden Tag', 'firstType');
+
+    config()->set('livewire-tagify.permissions.read', false);
+
+    Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ])->assertDontSee('Hidden Tag');
+});
+
+it('does not detach tags when delete permission is disabled', function () {
+    $this->model->attachTag('Keep Attached', 'firstType');
+
+    config()->set('livewire-tagify.permissions.delete', false);
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('removeTagEvent', ['value' => 'Keep Attached']);
+
+    expect($this->model->refresh()->tags)->count()->toBe(1);
+});
+
+it('does not edit tags owned by another model', function () {
+    $otherModel = TestModel::query()->create(['name' => 'Other Item']);
+    $otherModel->attachTag('Other Tag', 'firstType');
+    $otherTag = Tag::findFromString('Other Tag', 'firstType');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('editTagEvent', ['id' => $otherTag->id, 'value' => 'Changed Tag']);
+
+    expect(Tag::findFromString('Other Tag', 'firstType'))->not->toBeNull()
+        ->and(Tag::findFromString('Changed Tag', 'firstType'))->toBeNull();
+});
+
+it('does not delete tags owned by another model', function () {
+    $otherModel = TestModel::query()->create(['name' => 'Other Item']);
+    $otherModel->attachTag('Other Tag', 'firstType');
+    $otherTag = Tag::findFromString('Other Tag', 'firstType');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('deleteTagEvent', $otherTag->id);
+
+    expect(Tag::query()->where('id', $otherTag->id)->exists())->toBeTrue();
+});
+
+it('does not trust browser supplied tag type when changing color', function () {
+    $this->model->attachTag('Design', 'firstType');
+    Tag::findOrCreate('Design', 'secondType');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('changeColorTagEvent', 'Design', 'secondType', '#add8e6');
+
+    expect(Tag::findFromString('Design', 'firstType')->color)->toBe('#add8e6')
+        ->and(Tag::findFromString('Design', 'secondType')->color)->toBeNull();
+});
+
+it('does not change tag color to a color outside the configured list', function () {
+    $this->model->attachTag('Design', 'firstType');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('changeColorTagEvent', 'Design', 'firstType', '#ff0000');
+
+    expect(Tag::findFromString('Design', 'firstType')->color)->toBeNull();
+});
+
+it('uses tag policies before mutating tags', function () {
+    Gate::policy(Tag::class, TestTagPolicy::class);
+    $this->model->attachTag('Original Tag', 'firstType');
+    $tag = Tag::findFromString('Original Tag', 'firstType');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('editTagEvent', ['id' => $tag->id, 'value' => 'Blocked Rename']);
+
+    expect(Tag::findFromString('Original Tag', 'firstType'))->not->toBeNull()
+        ->and(Tag::findFromString('Blocked Rename', 'firstType'))->toBeNull();
+});
+
+it('allows mutations when a tag policy exists without the relevant method', function () {
+    Gate::policy(Tag::class, TestEmptyTagPolicy::class);
+    $this->model->attachTag('Original Tag', 'firstType');
+    $tag = Tag::findFromString('Original Tag', 'firstType');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('editTagEvent', ['id' => $tag->id, 'value' => 'Allowed Rename']);
+
+    expect(Tag::findFromString('Allowed Rename', 'firstType'))->not->toBeNull();
+});
+
+it('uses configured permission gates before mutating tags', function () {
+    Gate::define('deny-tag-update', function ($user = null, $tag = null, $model = null, $payload = [], $tagType = null) {
+        return false;
+    });
+
+    config()->set('livewire-tagify.permission_gates.update', 'deny-tag-update');
+
+    $this->model->attachTag('Original Tag', 'firstType');
+    $tag = Tag::findFromString('Original Tag', 'firstType');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    $component->emit('editTagEvent', ['id' => $tag->id, 'value' => 'Blocked Rename']);
+
+    expect(Tag::findFromString('Original Tag', 'firstType'))->not->toBeNull()
+        ->and(Tag::findFromString('Blocked Rename', 'firstType'))->toBeNull();
 });
