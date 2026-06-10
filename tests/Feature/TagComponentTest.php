@@ -82,3 +82,63 @@ it('permanently deletes a tag from the database', function () {
     $component->emit('deleteTagEvent', $tag->id);
     expect(Tag::query()->where('id', $tag->id)->exists())->toBeFalse();
 });
+
+it('uses the tailwind frontend view by default', function () {
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    expect($component->instance()->frontendLibrary())->toBe('tailwind')
+        ->and($component->instance()->frontendView())->toBe('livewire-tagify::livewire.tailwind');
+
+    $component->assertSeeHtml('data-livewire-tagify-dropdown="tailwind"');
+});
+
+it('uses the bootstrap frontend view when configured', function () {
+    config()->set('livewire-tagify.frontend_library', 'bootstrap');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    expect($component->instance()->frontendLibrary())->toBe('bootstrap')
+        ->and($component->instance()->frontendView())->toBe('livewire-tagify::livewire.bootstrap');
+
+    $component->assertSeeHtml('data-livewire-tagify-dropdown="bootstrap"');
+});
+
+it('uses the framework neutral frontend view when configured', function () {
+    config()->set('livewire-tagify.frontend_library', 'none');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    expect($component->instance()->frontendLibrary())->toBe('none')
+        ->and($component->instance()->frontendView())->toBe('livewire-tagify::livewire.none');
+
+    $component->assertSeeHtml('data-livewire-tagify-dropdown="none"')
+        ->assertDontSeeHtml('data-livewire-tagify-dropdown="tailwind"')
+        ->assertDontSeeHtml('data-livewire-tagify-dropdown="bootstrap"');
+});
+
+it('falls back to tailwind for an unsupported frontend library', function () {
+    config()->set('livewire-tagify.frontend_library', 'foundation');
+
+    $component = Livewire::test(TestTagComponent::class, [
+        'modelId' => $this->model->id,
+        'modelClass' => TestModel::class,
+        'tagType' => 'firstType',
+    ]);
+
+    expect($component->instance()->frontendLibrary())->toBe('tailwind')
+        ->and($component->instance()->frontendView())->toBe('livewire-tagify::livewire.tailwind');
+
+    $component->assertSeeHtml('data-livewire-tagify-dropdown="tailwind"');
+});

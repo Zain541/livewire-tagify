@@ -21,7 +21,18 @@ class LivewireTagifyServiceProvider extends ServiceProvider
             __DIR__.'/Config/livewire-tagify.php' => config_path('livewire-tagify.php'),
             __DIR__.'/Database/Migrations/create_tags_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_tags_table.php'),
         ], 'livewire-tagify');
-        //php artisan vendor:publish --provider="LivewireTagify\LivewireTagifyServiceProvider"  --tag=livewire-tagify-config
+
+        $this->publishes([
+            __DIR__.'/Config/livewire-tagify.php' => config_path('livewire-tagify.php'),
+        ], 'livewire-tagify-config');
+
+        $this->publishes([
+            __DIR__.'/Database/Migrations/create_tags_table.php' => database_path('migrations/'.date('Y_m_d_His', time()).'_create_tags_table.php'),
+        ], 'livewire-tagify-migrations');
+
+        $this->publishes([
+            __DIR__.'/views' => resource_path('views/vendor/livewire-tagify'),
+        ], ['livewire-tagify', 'livewire-tagify-views']);
     }
 
     public function register()

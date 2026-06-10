@@ -34,7 +34,7 @@ trait InteractsWithTags
     public function prepareConfigurations(): array
     {
 
-        $configurationKeys = ['colors', 'default_color'];
+        $configurationKeys = ['colors', 'default_color', 'frontend_library'];
         $configurations = $this->configurations();
         $prepareFinalConfigurations = [];
         foreach ($configurationKeys as $configurationKey) {
@@ -52,6 +52,21 @@ trait InteractsWithTags
             }
         }
         return $prepareFinalConfigurations;
+    }
+
+    public function frontendLibrary(): string
+    {
+        $frontendLibrary = $this->prepareConfigurations()['frontend_library'] ?? config('livewire-tagify.frontend_library', 'tailwind');
+
+        return in_array($frontendLibrary, ['tailwind', 'bootstrap', 'none'], true) ? $frontendLibrary : 'tailwind';
+    }
+
+    public function frontendView(): string
+    {
+        $frontendLibrary = $this->frontendLibrary();
+        $frontendViews = config('livewire-tagify.frontend_views', []);
+
+        return $frontendViews[$frontendLibrary] ?? 'livewire-tagify::livewire.tailwind';
     }
 
 
@@ -158,6 +173,6 @@ trait InteractsWithTags
 
     public function render()
     {
-        return view('livewire-tagify::livewire.livewire-tagify');
+        return view($this->frontendView());
     }
 }
