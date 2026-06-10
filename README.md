@@ -102,6 +102,36 @@ Here is the explanation of parameters
 ## Configurations
 Configurations are available at `config/livewire-tagify.php`. You can change the configuration in this file globally or you can use this function in your `Tags` component if you want to have multiple tags component
 
+### Frontend library
+
+The package ships with Tailwind, Bootstrap, and framework-neutral views. Tailwind is the default.
+
+```php
+// config/livewire-tagify.php
+
+'frontend_library' => 'tailwind', // tailwind, bootstrap, or none
+```
+
+Use Bootstrap markup instead:
+
+```php
+'frontend_library' => 'bootstrap',
+```
+
+Use framework-neutral markup if you want to write your own CSS:
+
+```php
+'frontend_library' => 'none',
+```
+
+The package only changes the rendered markup/classes. Your app still needs to load Alpine and Tagify. If you choose `tailwind` or `bootstrap`, your app must also load that frontend library.
+
+You can publish the package views if you need to customize the markup:
+
+```bash
+php artisan vendor:publish --tag=livewire-tagify-views
+```
+
 ```php
 <?php
 
